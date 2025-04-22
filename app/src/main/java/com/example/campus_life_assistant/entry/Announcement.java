@@ -34,4 +34,7 @@ public class Announcement {
     public String getContent() {
         return content;
     }
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
 }
