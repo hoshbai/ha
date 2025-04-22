@@ -15,12 +15,12 @@ import java.util.concurrent.Executors;
 public class DatabaseHelper {
 
     private static final String TAG = "DatabaseHelper";
-//    private static final String DB_URL = "jdbc:mysql://localhost:13306/AD";
-    private static final String DB_URL = "jdbc:mysql://47.98.61.53:3306/AD";
-    private static final String DB_USER = "remote_user";
-//    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "FengKefeng520!";
-//    private static final String DB_PASSWORD = "123456";
+    private static final String DB_URL = "jdbc:mysql://10.0.2.2:13306/AD";
+//    private static final String DB_URL = "jdbc:mysql://47.98.61.53:3306/AD";
+//    private static final String DB_USER = "remote_user";
+    private static final String DB_USER = "root";
+//    private static final String DB_PASSWORD = "FengKefeng520!";
+    private static final String DB_PASSWORD = "123456";
     private static final String TABLE_USERS = "users";
 
     public DatabaseHelper(Context context) {

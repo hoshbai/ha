@@ -45,4 +45,7 @@
     <color name="hintColor">#9E9E9E</color> <!-- 提示文字颜色 -->
     <color name="textColor">#212121</color> <!-- 默认文字颜色 -->
 
+<!--    宿舍公告界面-->
+    <color name="colorAccent">#3AF6B8</color>
+
 </resources>
