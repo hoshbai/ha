@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primaryColor">#667CD7</color> <!-- 主色 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="md_theme_light_primary">#006C4C</color>
@@ -31,21 +32,20 @@
     <color name="default_course">#A9A9A9</color>
 
     <!--    饭卡-->
-    <color name="primaryColor">#006C4C</color> <!-- 主色 -->
     <color name="secondaryColor">#03DAC5</color> <!-- 辅色 -->
     <color name="primaryDarkColor">#3700B3</color> <!-- 深色主色 -->
     <color name="surfaceColor">#FFFFFF</color> <!-- 表面颜色 -->
 
-    <color name="primaryDark">#004C3C</color>
+    <color name="primaryDark">#667CD7</color>
     <color name="accentColor">#FFD700</color>
     <color name="cardBackground">#FFFFFF</color>
 
-<!--宿舍电费界面-->
+    <!--宿舍电费界面-->
     <color name="background">#FAFAFA</color> <!-- 背景颜色 -->
     <color name="hintColor">#9E9E9E</color> <!-- 提示文字颜色 -->
     <color name="textColor">#212121</color> <!-- 默认文字颜色 -->
 
-<!--    宿舍公告界面-->
+    <!--    宿舍公告界面-->
     <color name="colorAccent">#3AF6B8</color>
 
 </resources>
