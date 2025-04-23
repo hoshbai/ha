@@ -128,7 +128,12 @@ public class MainActivity extends AppCompatActivity {
         testDatabaseConnection();
     }
 
-
+    /**
+     * Checks if the device has an active network connection capable of reaching the internet.
+     * Uses NetworkCapabilities for modern Android versions.
+     * Requires ACCESS_NETWORK_STATE permission.
+     * @return true if a network connection is available, false otherwise.
+     */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager == null) {

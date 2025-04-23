@@ -308,7 +308,7 @@ public class DatabaseHelper {
         new RegisterTask(listener).execute(username, password);
     }
 
-    // Check user credentials (asynchronously)
+
     public void checkUserCredentials(String username, String password, OnLoginListener listener) {
         Log.d(TAG, "尝试检查用户凭据..."); // Attempting to check user credentials...
         ensureTableExists(); // Ensure table exists before attempting login
