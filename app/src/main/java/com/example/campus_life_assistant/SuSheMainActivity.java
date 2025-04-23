@@ -46,15 +46,12 @@ public class SuSheMainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SuSheMemberInfo.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-        // 其他功能项点击事件
-        View[] functionViews = {
-                findViewById(R.id.cvNotice)
-        };
+        findViewById(R.id.cvNotice).setOnClickListener(v -> {
+            startActivity(new Intent(this, SuSheAnnouncementActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
 
-        for (View view : functionViews) {
-            view.setOnClickListener(v -> {
-                Toast.makeText(this, "功能正在开发中", Toast.LENGTH_SHORT).show();
-            });
-        }
+
+
     }
 }
