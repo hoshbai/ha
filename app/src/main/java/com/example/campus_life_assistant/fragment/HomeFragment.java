@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.campus_life_assistant.CanteenActivity;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.RepairActivity;
 import com.example.campus_life_assistant.ScheduleActivity;
@@ -48,10 +49,10 @@ public class HomeFragment extends Fragment {
         // 食堂卡片
         view.findViewById(R.id.canteenCard).setOnClickListener(v -> {
             Toast.makeText(getContext(), "跳转到食堂界面", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getActivity(), StuCardActivity.class);
+            Intent intent = new Intent(getActivity(), CanteenActivity.class);
             startActivity(intent);
-            // 跳转逻辑待实现
         });
+
 
         // 宿舍卡片
         view.findViewById(R.id.dormitoryCard).setOnClickListener(v -> {

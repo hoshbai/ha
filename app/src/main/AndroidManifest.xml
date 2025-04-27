@@ -37,6 +37,10 @@
             android:name=".RepairActivity"
             android:exported="true" />
         <activity
+            android:name="com.example.campus_life_assistant.CanteenActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".LoginActivity"
             android:exported="true" /> <!-- 移除intent-filter -->
         <!-- 修改后的StuCardActivity配置 -->
@@ -45,6 +49,7 @@
             android:exported="true" /> <!-- 必须设置为true -->
         <!-- <activity -->
         <!-- android:name=".HomeActivity" -->
+        <activity android:name=".FoodDetailActivity" />
         <!-- android:exported="true" /> -->
         <activity
             android:name=".MainActivity"
