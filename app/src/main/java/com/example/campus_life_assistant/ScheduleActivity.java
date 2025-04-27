@@ -14,13 +14,12 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campus_life_assistant.R;
-import com.example.campus_life_assistant.entry.Course;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import com.example.campus_life_assistant.entry.Course;
 public class ScheduleActivity extends AppCompatActivity {
     private List<Course> courses = new ArrayList<>();
     private int currentWeek = 9; // 默认当前周

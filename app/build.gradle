@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -29,7 +30,15 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-auth:21.4.0'
 
+    // Security library for EncryptedSharedPreferences
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
+    implementation 'com.google.firebase:firebase-database:20.3.1'
+    implementation platform('com.google.firebase:firebase-bom:33.12.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    // Gson for JSON parsing
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
