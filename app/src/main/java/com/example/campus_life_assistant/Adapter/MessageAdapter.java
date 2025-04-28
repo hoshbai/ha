@@ -8,12 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.entry.Message;
-
 import java.util.List;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int VIEW_TYPE_USER = 0;
-    private static final int VIEW_TYPE_AI = 1;
+    private static final int VIEW_TYPE_AI_THINK = 1;
+    private static final int VIEW_TYPE_AI_REPLY = 2;
 
     private List<Message> messages;
 
@@ -28,10 +28,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_user_message, parent, false);
             return new UserMessageViewHolder(view);
+        } else if (viewType == VIEW_TYPE_AI_THINK) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_ai_think, parent, false);
+            return new AiThinkViewHolder(view);
         } else {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_ai_message, parent, false);
-            return new AiMessageViewHolder(view);
+                    .inflate(R.layout.item_ai_reply, parent, false);
+            return new AiReplyViewHolder(view);
         }
     }
 
@@ -40,8 +44,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Message message = messages.get(position);
         if (holder instanceof UserMessageViewHolder) {
             ((UserMessageViewHolder) holder).bind(message.getContent());
-        } else if (holder instanceof AiMessageViewHolder) {
-            ((AiMessageViewHolder) holder).bind(message.getContent());
+        } else if (holder instanceof AiThinkViewHolder) {
+            ((AiThinkViewHolder) holder).bind(message.getContent());
+        } else if (holder instanceof AiReplyViewHolder) {
+            ((AiReplyViewHolder) holder).bind(message.getContent());
         }
     }
 
@@ -52,7 +58,14 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        return messages.get(position).isUserMessage() ? VIEW_TYPE_USER : VIEW_TYPE_AI;
+        Message message = messages.get(position);
+        if (message.isUserMessage()) {
+            return VIEW_TYPE_USER;
+        } else if (message.isThink()) {
+            return VIEW_TYPE_AI_THINK;
+        } else {
+            return VIEW_TYPE_AI_REPLY;
+        }
     }
 
     static class UserMessageViewHolder extends RecyclerView.ViewHolder {
@@ -68,16 +81,29 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    static class AiMessageViewHolder extends RecyclerView.ViewHolder {
-        TextView messageTextView;
+    static class AiThinkViewHolder extends RecyclerView.ViewHolder {
+        TextView thinkTextView;
 
-        public AiMessageViewHolder(@NonNull View itemView) {
+        public AiThinkViewHolder(@NonNull View itemView) {
             super(itemView);
-            messageTextView = itemView.findViewById(R.id.messageTextView);
+            thinkTextView = itemView.findViewById(R.id.thinkTextView);
         }
 
         public void bind(String content) {
-            messageTextView.setText(content);
+            thinkTextView.setText(content);
+        }
+    }
+
+    static class AiReplyViewHolder extends RecyclerView.ViewHolder {
+        TextView replyTextView;
+
+        public AiReplyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            replyTextView = itemView.findViewById(R.id.replyTextView);
+        }
+
+        public void bind(String content) {
+            replyTextView.setText(content);
         }
     }
 }

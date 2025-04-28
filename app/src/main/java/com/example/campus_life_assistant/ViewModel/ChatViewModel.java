@@ -7,52 +7,75 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.campus_life_assistant.api.ApiService;
+import com.example.campus_life_assistant.api.ChatRequest;
 import com.example.campus_life_assistant.api.ChatResponse;
 import com.example.campus_life_assistant.api.RetrofitInstance;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ChatViewModel extends ViewModel {
-    private MutableLiveData<String> response = new MutableLiveData<>();
+    private MutableLiveData<String> thinkResponse = new MutableLiveData<>(); // 存储 <think> 部分
+    private MutableLiveData<String> finalResponse = new MutableLiveData<>(); // 存储正式回答部分
 
-    public LiveData<String> getResponse() {
-        return response;
+    public LiveData<String> getThinkResponse() {
+        return thinkResponse;
+    }
+
+    public LiveData<String> getFinalResponse() {
+        return finalResponse;
     }
 
     public void sendMessage(String message) {
-        ApiService apiService = RetrofitInstance.getApiService();
-        apiService.sendMessage(new com.example.campus_life_assistant.api.ChatRequest(message))
-            .enqueue(new Callback<>() {
-                @Override
-                public void onResponse(Call<ChatResponse> call, Response<ChatResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        ChatResponse chatResponse = response.body();
-                        String serverResponse = chatResponse.getContent(); // 获取服务器返回的字符串
-                        Log.d("ServerResponse", "Parsed: " + serverResponse);
+        ApiService apiService = RetrofitInstance.getApiService(); // 获取 API 服务实例
+        apiService.sendMessage(new ChatRequest(message)) // 发送消息
+                .enqueue(new Callback<>() { // 异步处理响应
+                    @Override
+                    public void onResponse(Call<ChatResponse> call, Response<ChatResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            ChatResponse chatResponse = response.body();
+                            String serverResponse = chatResponse.getContent();
+                            Log.d("ServerResponse", "Parsed: " + serverResponse);
 
-                        // 更新 LiveData，以便在 UI 中显示
-                        ChatViewModel.this.response.setValue(serverResponse);
-                    } else {
-                        try {
-                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                            Log.e("ServerResponse", "Error Code: " + response.code() + ", Error Body: " + errorBody);
-                            ChatViewModel.this.response.setValue("Error: " + errorBody);
-                        } catch (Exception e) {
-                            Log.e("ServerResponse", "Error parsing error body: " + e.getMessage());
-                            ChatViewModel.this.response.setValue("Error: Failed to parse response");
+                            // 更新 LiveData
+                            thinkResponse.setValue(extractThinkPart(serverResponse));
+                            finalResponse.setValue(extractFinalPart(serverResponse));
+                        } else {
+                            try {
+                                String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                                Log.e("ServerResponse", "Error Code: " + response.code() + ", Error Body: " + errorBody);
+                                finalResponse.setValue("Error: " + errorBody);
+                            } catch (Exception e) {
+                                Log.e("ServerResponse", "Error parsing error body: " + e.getMessage());
+                                finalResponse.setValue("Error: Failed to parse response");
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<ChatResponse> call, Throwable t) {
-                    Log.e("ServerResponse", "Network Failure: " + t.getMessage());
-                    ChatViewModel.this.response.setValue("Error: " + t.getMessage());
-                }
-            });
+                    @Override
+                    public void onFailure(Call<ChatResponse> call, Throwable t) {
+                        Log.e("ServerResponse", "Network Failure: " + t.getMessage());
+                        finalResponse.setValue("Error: " + t.getMessage());
+                    }
+                });
+    }
+    // 提取 <think> 部分
+    private String extractThinkPart(String serverResponse) {
+        int startIndex = serverResponse.indexOf("<think>");
+        int endIndex = serverResponse.indexOf("</think>");
+        if (startIndex != -1 && endIndex != -1) {
+            return serverResponse.substring(startIndex + 7, endIndex).trim(); // 去掉 <think> 标签
+        }
+        return ""; // 如果没有 <think> 部分，返回空字符串
+    }
+
+    // 提取正式回答部分
+    private String extractFinalPart(String serverResponse) {
+        int endIndex = serverResponse.indexOf("</think>");
+        if (endIndex != -1) {
+            return serverResponse.substring(endIndex + 8).trim(); // 去掉 </think> 标签及之前的内容
+        }
+        return serverResponse.trim(); // 如果没有 <think> 部分，直接返回完整内容
     }
 }
