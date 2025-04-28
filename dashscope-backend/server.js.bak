@@ -1,0 +1,56 @@
+import express from 'express';
+import OpenAI from 'openai';
+import * as dotenv from 'dotenv';
+
+// 加载环境变量
+dotenv.config();
+
+// 初始化 OpenAI 客户端
+const openai = new OpenAI({
+    apiKey: process.env.DASHSCOPE_API_KEY, // 从环境变量读取 API Key
+    baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
+});
+
+// 创建 Express 应用
+const app = express();
+app.use(express.json()); // 解析 JSON 请求体
+
+// 定义 API 路由
+app.post('/chat', async (req, res) => {
+    const { message } = req.body;
+
+    if (!message) {
+        return res.status(400).json({ error: 'Missing "message" in request body' });
+    }
+
+    try {
+        const stream = await openai.chat.completions.create({
+            model: 'qwq-32b',
+            messages: [{ role: 'user', content: message }],
+            stream: true
+        });
+
+        let fullResponse = ''; // 用于存储完整的响应内容
+
+        for await (const chunk of stream) {
+            if (!chunk.choices?.length) continue;
+            const delta = chunk.choices[0].delta;
+            if (delta.reasoning_content || delta.content) {
+                const content = delta.reasoning_content || delta.content;
+                fullResponse += content; // 拼接内容
+            }
+        }
+		console.log('responseJson:', response)
+        // 返回完整的 JSON 响应
+        res.json({ response: fullResponse });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// 启动服务器
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
