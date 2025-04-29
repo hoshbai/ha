@@ -1,19 +1,47 @@
 import express from 'express';
 import OpenAI from 'openai';
 import * as dotenv from 'dotenv';
+import os from 'node:os'; // 用于获取本机IP
 
 // 加载环境变量
 dotenv.config();
 
+// 获取本机非内网IPv4地址
+function getServerIP() {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const intf of interfaces[name]) {
+            if (
+                intf.family === 'IPv4' &&
+                !intf.internal && // 排除内网地址
+                !name.startsWith('docker') && // 排除 Docker 网络
+                !name.startsWith('veth') // 排除虚拟网卡
+            ) {
+                return intf.address;
+            }
+        }
+    }
+    return 'localhost'; // 默认回退
+}
+
 // 初始化 OpenAI 客户端
 const openai = new OpenAI({
-    apiKey: process.env.DASHSCOPE_API_KEY, // 从环境变量读取 API Key
+    apiKey: process.env.DASHSCOPE_API_KEY,
     baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1'
 });
 
 // 创建 Express 应用
 const app = express();
-app.use(express.json()); // 解析 JSON 请求体
+app.use(express.json());
+
+// 中间件：记录客户端IP和服务端IP
+app.use((req, res, next) => {
+    const clientIP = req.ip || req.socket?.remoteAddress || 'unknown';
+    const serverIP = getServerIP();
+    const date = new Date().toISOString();
+    console.log(`[${date}] Request from ${clientIP} to ${serverIP}${req.url}`);
+    next();
+});
 
 // 定义 API 路由
 app.post('/chat', async (req, res) => {
@@ -40,8 +68,8 @@ app.post('/chat', async (req, res) => {
                 fullResponse += content; // 拼接内容
             }
         }
-		console.log('responseJson:', fullResponse)
-        // 返回完整的 JSON 响应
+
+        console.log('responseJson:', fullResponse);
         res.json({ response: fullResponse });
     } catch (error) {
         console.error('Error:', error);
@@ -52,5 +80,6 @@ app.post('/chat', async (req, res) => {
 // 启动服务器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    const serverIP = getServerIP();
+    console.log(`Server is running on http://${serverIP}:${PORT}`);
 });
