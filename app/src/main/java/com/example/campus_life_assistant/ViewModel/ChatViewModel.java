@@ -30,7 +30,7 @@ public class ChatViewModel extends ViewModel {
     public void sendMessage(String message) {
         ApiService apiService = RetrofitInstance.getApiService(); // 获取 API 服务实例
         apiService.sendMessage(new ChatRequest(message)) // 发送消息
-                .enqueue(new Callback<>() { // 异步处理响应
+                .enqueue(new Callback<ChatResponse>() { // 异步处理响应
                     @Override
                     public void onResponse(Call<ChatResponse> call, Response<ChatResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {

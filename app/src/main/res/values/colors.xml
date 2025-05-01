@@ -67,4 +67,12 @@
     <color name="queue_medium">#FFC107</color> <!-- Amber for medium queue -->
     <color name="queue_high">#F44336</color>
 
+
+    <color name="md_themedark_primary">#6CDBAC</color>
+    <color name="md_theme_dark_onPrimary">#003826</color>
+    <color name="md_theme_dark_primaryContainer">#005138</color>
+    <color name="md_theme_dark_onPrimaryContainer">#89F8C7</color>
+    <color name="md_theme_dark_background">#191C1A</color>
+    <color name="md_theme_dark_onBackground">#E1E3DF</color>
+
 </resources>

@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.campus_life_assistant.AIChatActivity;
 import com.example.campus_life_assistant.CanteenActivity;
+import com.example.campus_life_assistant.Maptest;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.RepairActivity;
 import com.example.campus_life_assistant.ScheduleActivity;
@@ -66,6 +67,13 @@ public class HomeFragment extends Fragment {
         view.findViewById(R.id.AICard).setOnClickListener(v -> {
             Toast.makeText(getContext(), "跳转到校园助手界面", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getActivity(), AIChatActivity.class);
+            startActivity(intent);
+            // 跳转逻辑待实现
+        });
+        // A校园地图导航卡片
+        view.findViewById(R.id.SchoolMap).setOnClickListener(v -> {
+            Toast.makeText(getContext(), "跳转到校园地图导航界面", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), Maptest.class);
             startActivity(intent);
             // 跳转逻辑待实现
         });
