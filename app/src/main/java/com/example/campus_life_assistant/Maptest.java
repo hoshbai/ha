@@ -2,13 +2,23 @@ package com.example.campus_life_assistant;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.amap.api.location.AMapLocation;
@@ -20,6 +30,9 @@ import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.MapsInitializer;
 import com.amap.api.services.core.ServiceSettings;
+
+import java.util.Arrays;
+import java.util.List;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -38,7 +51,7 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
     //地图控制器
     private AMap aMap = null;
     //位置更改监听
-    private LocationSource.OnLocationChangedListener mListener;
+    private OnLocationChangedListener mListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +68,7 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
         //搜索隐私政策同意
         ServiceSettings.updatePrivacyShow(context, true, true);
         ServiceSettings.updatePrivacyAgree(context, true);
+
         setContentView(R.layout.activity_school_map);
         mapView = findViewById(R.id.map_view);
 
@@ -98,8 +112,18 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mListener = onLocationChangedListener;
-        if (mLocationClient != null) {
-            mLocationClient.startLocation();//启动定位
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            List<String> perms = Arrays.asList(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            );
+            if (EasyPermissions.hasPermissions(this, String.valueOf(perms))) {
+                mLocationClient.startLocation();
+            } else {
+                requestPermission();
+            }
+        } else {
+            mLocationClient.startLocation(); // 低版本无需动态权限
         }
     }
 
@@ -111,7 +135,7 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
         mListener = null;
         if (mLocationClient != null) {
             mLocationClient.stopLocation();
-            mLocationClient.onDestroy();
+            mLocationClient.onDestroy(); // ✅ 销毁客户端
         }
         mLocationClient = null;
     }
@@ -141,34 +165,29 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
      */
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
-        if (aMapLocation != null) {
-            if (aMapLocation.getErrorCode() == 0) {
-                //地址
-                String address = aMapLocation.getAddress();
+        Log.d("LocationType", String.valueOf(aMapLocation.getLocationType()));
+        if (aMapLocation.getErrorCode() == 0) {
+            double lat = aMapLocation.getLatitude();
+            double lon = aMapLocation.getLongitude();
+            String address = aMapLocation.getAddress();
+            // 第一个 Toast 显示经纬度
+            Toast.makeText(this, "纬度：" + lat + "\n经度：" + lon, Toast.LENGTH_SHORT).show();
 
-                //获取纬度
-                double latitude = aMapLocation.getLatitude();
-//获取经度
-                double longitude = aMapLocation.getLongitude();
-                StringBuffer stringBuffer = new StringBuffer();
-                stringBuffer.append("纬度:" + latitude + "\n");
-                stringBuffer.append("经度:" + longitude + "\n");
-                stringBuffer.append("地址:" + address + "\n");
-                Log.d("MainActivity", stringBuffer.toString());
-                showMsg(address);
-                mLocationClient.stopLocation();
-                if (mListener == null) {
-                    //显示系统图标
-                    mListener.onLocationChanged(aMapLocation);
+            // 延迟一小段时间再显示地址
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                Toast.makeText(this, "地址：" + address, Toast.LENGTH_SHORT).show();
+            }, 2000); // 延迟 500 毫秒
+            // 停止定位（防止重复回调）
+            mLocationClient.stopLocation();
+            mListener.onLocationChanged(aMapLocation);
 
-                }
-            } else {
-                //定位失败时，可通过ErrCode（错误码）信息来确定失败的原因，errInfo是错误信息，详见错误码表。
-                Log.e("AmapError", "location Error, ErrCode:"
-                        + aMapLocation.getErrorCode() + ", errInfo:"
-                        + aMapLocation.getErrorInfo());
-            }
+        } else {
+            Log.e("AmapError", "ErrCode:" + aMapLocation.getErrorCode());
         }
+    }
+
+    private void showMsg(String msg){
+        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -212,8 +231,30 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //设置权限请求结果
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+
+        if (requestCode == REQUEST_PERMISSIONS) {
+            List<String> perms = Arrays.asList(permissions);
+            if (EasyPermissions.hasPermissions(this, String.valueOf(perms))) {
+                mLocationClient.startLocation();
+            } else {
+                Toast.makeText(this, "权限不足，部分功能无法使用", Toast.LENGTH_SHORT).show();
+                // 可选：检测是否永久拒绝权限并引导至设置
+                if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+                    new AlertDialog.Builder(this)
+                            .setMessage("请前往设置手动开启定位权限")
+                            .setPositiveButton("去设置", (d, w) -> openAppSettings())
+                            .show();
+                }
+            }
+        }
+    }
+
+    private void openAppSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 
     /**
@@ -221,8 +262,23 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
      *
      * @param msg 提示内容
      */
-    private void showMsg(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    private void MyShowMsg(String msg) {
+        try {
+            LayoutInflater inflater = getLayoutInflater();
+            View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.custom_toast_container));
+
+            TextView text = layout.findViewById(R.id.custom_toast_message);
+            text.setText(msg);
+
+            Toast toast = new Toast(getApplicationContext());
+            toast.setDuration(Toast.LENGTH_SHORT);
+            toast.setView(layout);
+            toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 100);
+            toast.show();
+
+        } catch (Exception e) {
+            Log.e("Toast", e.toString());
+        }
     }
 
     /**
@@ -231,23 +287,13 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
     @AfterPermissionGranted(REQUEST_PERMISSIONS)
     private void requestPermission() {
         String[] permissions = {
-                Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.ACCESS_COARSE_LOCATION
         };
-
         if (EasyPermissions.hasPermissions(this, permissions)) {
-            //true 有权限 开始定位
-            showMsg("已获得权限，可以定位啦！");
-            mLocationClient.startLocation();
+            mLocationClient.startLocation(); // 权限已授予，启动定位
         } else {
-//            showMsg("已获得权限，可以定位啦！");
-//            mLocationClient.startLocation();
-            //false 无权限
-            showMsg("已获得权限，可以定位啦！");
-            mLocationClient.startLocation();
-            EasyPermissions.requestPermissions(this, "需要权限", REQUEST_PERMISSIONS, permissions);
+            EasyPermissions.requestPermissions(this, "需要定位权限", REQUEST_PERMISSIONS, permissions);
         }
     }
 
@@ -256,11 +302,11 @@ public class Maptest extends AppCompatActivity implements AMapLocationListener, 
      */
     private void checkingAndroidVersion() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //Android6.0及以上先获取权限再定位
+            // Android 6.0+ 需动态权限
             requestPermission();
         } else {
-            //Android6.0以下直接定位
-            mLocationClient.startLocation();
+            // Android 6.0以下直接定位（无需动态权限）
+            mLocationClient.startLocation(); // ✅ 低版本系统安全启动定位
         }
     }
 
