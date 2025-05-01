@@ -1,234 +1,312 @@
-//package com.example.campus_life_assistant;
-//
-//import android.Manifest;
-//import android.content.Context;
-//import android.content.pm.PackageManager;
-//import android.os.Bundle;
-//import android.os.RemoteException;
-//import android.util.Log;
-//
-//import androidx.annotation.NonNull;
-//import androidx.appcompat.app.AppCompatActivity;
-//import androidx.core.app.ActivityCompat;
-//
-//import com.amap.api.location.AMapLocationClient;
-//import com.amap.api.maps.AMap;
-//import com.amap.api.maps.CameraUpdateFactory;
-//import com.amap.api.maps.MapView;
-//import com.amap.api.maps.MapsInitializer;
-//import com.amap.api.maps.model.LatLng;
-//import com.amap.api.maps.model.MarkerOptions;
-//import com.amap.api.maps.model.MyLocationStyle;
-//import com.amap.api.services.core.ServiceSettings;
-//
-//public class SchoolMapActivity extends AppCompatActivity {
-//
-//    private static final String TAG = "SchoolMapActivity";
-//    private MapView mMapView;
-//    private AMap aMap;
-//    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        Context context = this;
-//        //定位隐私政策同意
-//        AMapLocationClient.updatePrivacyShow(context,true,true);
-//        AMapLocationClient.updatePrivacyAgree(context,true);
-//        //地图隐私政策同意
-//        MapsInitializer.updatePrivacyShow(context,true,true);
-//        MapsInitializer.updatePrivacyAgree(context,true);
-//        //搜索隐私政策同意
-//        ServiceSettings.updatePrivacyShow(context,true,true);
-//        ServiceSettings.updatePrivacyAgree(context,true);
-//        if (getWindow().getDecorView().getRootView() == null) {
-//            Log.e(TAG, "RootView 为空，可能被系统优化隐藏");
-//        }
-//        try {
-//            MapsInitializer.initialize(getApplicationContext());
-//            Log.d(TAG, "高德地图 SDK 初始化成功");
-//        } catch (Exception e) {
-//            Log.e(TAG, "高德地图 SDK 初始化失败", e);
-//        }
-//
-//        try {
-//            setContentView(R.layout.activity_school_map);
-//
-//            // 初始化 MapView
-//            mMapView = findViewById(R.id.map);
-//            if (mMapView == null) {
-//                Log.e(TAG, "onCreate: MapView 初始化失败，布局文件中未找到 map 视图");
-//                return;
-//            }
-//
-//            mMapView.onCreate(savedInstanceState);
-//            Log.d(TAG, "MapView 创建成功");
-//
-//            // 初始化 AMap 对象
-//            if (aMap == null) {
-//                aMap = mMapView.getMap();
-//                if (aMap != null) {
-//                    Log.d(TAG, "AMap 实例创建成功");
-//                    setupMap();
-//                } else {
-//                    Log.e(TAG, "AMap 实例创建失败，请检查 API 密钥和网络连接");
-//                }
-//            }
-//
-//            // 请求定位权限
-//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                    != PackageManager.PERMISSION_GRANTED) {
-//                Log.d(TAG, "请求定位权限");
-//                ActivityCompat.requestPermissions(this,
-//                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-//                        LOCATION_PERMISSION_REQUEST_CODE);
-//            } else {
-//                enableLocation();
-//            }
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "onCreate 发生异常: ", e);
-//        }
-//    }
-//
-//    private void setupMap() {
-//        try {
-//            if (aMap == null) {
-//                Log.e(TAG, "setupMap: AMap 实例为空");
-//                return;
-//            }
-//
-//            // 设置地图类型：普通地图
-//            aMap.setMapType(AMap.MAP_TYPE_NORMAL);
-//            Log.d(TAG, "地图类型设置为普通地图");
-//
-//            // 设置默认缩放级别和中心点（例如校园中心点）118.292685,29.692136
-//            LatLng campusCenter = new LatLng(29.692136, 118.292685); // 替换为你的校园实际经纬度
-//            aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(campusCenter, 10)); // 缩放级别 10
-//            // 地图加载完成监听
-//            aMap.setOnMapLoadedListener(() -> {
-//                Log.d(TAG, "地图加载完成");
-//                aMap.addMarker(new MarkerOptions()
-//                        .position(new LatLng(29.692136, 118.292685))
-//                        .title("校园中心"));
-//                // 可在此执行地图加载后的操作（如添加标记、路线等）
-//            });
-//
-//            // 设置定位样式
-//            MyLocationStyle myLocationStyle = new MyLocationStyle();
-//            myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER);
-//            aMap.setMyLocationStyle(myLocationStyle);
-//
-//            Log.d(TAG, "地图缩放级别和中心点设置完成");
-//
-//        } catch (Exception e) {
-//            Log.e(TAG, "setupMap 发生异常: ", e);
-//        }
-//    }
-//
-//    // 启用定位图层（显示蓝点）
-//    private void enableLocation() {
-//        Log.d(TAG, "尝试启用定位功能");
-//
-//        try {
-//            if (aMap == null) {
-//                Log.e(TAG, "enableLocation: AMap 实例为空");
-//                return;
-//            }
-//
-//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                    != PackageManager.PERMISSION_GRANTED &&
-//                    ActivityCompat.checkSelfPermission(this,
-//                            Manifest.permission.ACCESS_COARSE_LOCATION)
-//                            != PackageManager.PERMISSION_GRANTED) {
-//                Log.w(TAG, "定位权限未被授予");
-//                return;
-//            }
-//
-//            aMap.setMyLocationEnabled(true); // 显示定位蓝点
-//            aMap.getUiSettings().setMyLocationButtonEnabled(true); // 显示定位按钮
-//            Log.d(TAG, "定位功能已启用");
-//
-//        } catch (SecurityException e) {
-//            Log.e(TAG, "定位权限安全异常: ", e);
-//        } catch (Exception e) {
-//            Log.e(TAG, "enableLocation 发生异常: ", e);
-//        }
-//    }
-//
-//    // 权限请求回调
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode,
-//                                           @NonNull String[] permissions,
-//                                           @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        Log.d(TAG, "收到权限请求结果");
-//
-//        try {
-//            if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    Log.d(TAG, "定位权限被授予");
-//                    enableLocation();
-//                } else {
-//                    Log.w(TAG, "定位权限被拒绝");
-//                    // 提示用户手动授权
-//                }
-//            }
-//        } catch (Exception e) {
-//            Log.e(TAG, "onRequestPermissionsResult 发生异常: ", e);
-//        }
-//    }
-//
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        try {
-//            mMapView.onResume();
-//            Log.d(TAG, "MapView 恢复");
-//        } catch (Exception e) {
-//            Log.e(TAG, "onResume 发生异常: ", e);
-//        }
-//
-//        // 检查当前 MapView 是否可见
-//        if (mMapView != null && mMapView.isShown()) {
-//            Log.d(TAG, "MapView 当前可见");
-//        } else {
-//            Log.e(TAG, "MapView 未显示，请检查布局和系统优化策略");
-//        }
-//    }
-//
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        try {
-//            mMapView.onPause();
-//            Log.d(TAG, "MapView 暂停");
-//        } catch (Exception e) {
-//            Log.e(TAG, "onPause 发生异常: ", e);
-//        }
-//    }
-//
-//    @Override
-//    protected void onSaveInstanceState(@NonNull Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        try {
-//            mMapView.onSaveInstanceState(outState);
-//            Log.d(TAG, "保存地图实例状态");
-//        } catch (Exception e) {
-//            Log.e(TAG, "onSaveInstanceState 发生异常: ", e);
-//        }
-//    }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        try {
-//            if (mMapView != null) {
-//                mMapView.onDestroy();
-//                Log.d(TAG, "MapView 销毁完成");
-//            }
-//        } catch (Exception e) {
-//            Log.e(TAG, "onDestroy 发生异常: ", e);
-//        }
-//    }
-//}
+package com.example.campus_life_assistant;
+
+import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.LocationSource;
+import com.amap.api.maps.MapView;
+import com.amap.api.maps.MapsInitializer;
+import com.amap.api.services.core.ServiceSettings;
+
+import java.util.Arrays;
+import java.util.List;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
+
+public class SchoolMapActivity extends AppCompatActivity implements AMapLocationListener, LocationSource {
+    private static final int REQUEST_PERMISSIONS = 9527;
+
+    //声明AMapLocationClient类对象
+    public AMapLocationClient mLocationClient = null;
+    //声明AMapLocationClientOption对象
+    public AMapLocationClientOption mLocationOption = null;
+    //内容
+//    private TextView tvContent;
+    private MapView mapView;
+    //地图控制器
+    private AMap aMap = null;
+    //位置更改监听
+    private OnLocationChangedListener mListener;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+        Context context = this;
+        //定位隐私政策同意
+        AMapLocationClient.updatePrivacyShow(context, true, true);
+        AMapLocationClient.updatePrivacyAgree(context, true);
+        //地图隐私政策同意
+        MapsInitializer.updatePrivacyShow(context, true, true);
+        MapsInitializer.updatePrivacyAgree(context, true);
+        //搜索隐私政策同意
+        ServiceSettings.updatePrivacyShow(context, true, true);
+        ServiceSettings.updatePrivacyAgree(context, true);
+
+        setContentView(R.layout.activity_school_map);
+        mapView = findViewById(R.id.map_view);
+
+        mapView.onCreate(savedInstanceState);
+        initLocation();
+        initMap(savedInstanceState);
+        checkingAndroidVersion();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLocationClient.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //在activity执行onResume时执行mMapView.onResume ()，重新绘制加载地图
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
+        mapView.onPause();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //在activity执行onSaveInstanceState时执行mMapView.onSaveInstanceState (outState)，保存地图当前的状态
+        mapView.onSaveInstanceState(outState);
+    }
+
+    /**
+     * 激活定位
+     */
+    @Override
+    public void activate(OnLocationChangedListener onLocationChangedListener) {
+        mListener = onLocationChangedListener;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            List<String> perms = Arrays.asList(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            );
+            if (EasyPermissions.hasPermissions(this, String.valueOf(perms))) {
+                mLocationClient.startLocation();
+            } else {
+                requestPermission();
+            }
+        } else {
+            mLocationClient.startLocation(); // 低版本无需动态权限
+        }
+    }
+
+    /**
+     * 停止定位
+     */
+    @Override
+    public void deactivate() {
+        mListener = null;
+        if (mLocationClient != null) {
+            mLocationClient.stopLocation();
+            mLocationClient.onDestroy(); // ✅ 销毁客户端
+        }
+        mLocationClient = null;
+    }
+
+    /**
+     * 初始化地图
+     *
+     * @param savedInstanceState
+     */
+    private void initMap(Bundle savedInstanceState) {
+        mapView = findViewById(R.id.map_view);
+        //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
+        mapView.onCreate(savedInstanceState);
+        //初始化地图控制器对象
+        aMap = mapView.getMap();
+
+        // 设置定位监听
+        aMap.setLocationSource(this);
+        // 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
+        aMap.setMyLocationEnabled(true);
+    }
+
+    /**
+     * 接收异步返回的定位结果
+     *
+     * @param aMapLocation
+     */
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        Log.d("LocationType", String.valueOf(aMapLocation.getLocationType()));
+        if (aMapLocation.getErrorCode() == 0) {
+            double lat = aMapLocation.getLatitude();
+            double lon = aMapLocation.getLongitude();
+            String address = aMapLocation.getAddress();
+            // 第一个 Toast 显示经纬度
+            Toast.makeText(this, "纬度：" + lat + "\n经度：" + lon, Toast.LENGTH_SHORT).show();
+
+            // 延迟一小段时间再显示地址
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                Toast.makeText(this, "地址：" + address, Toast.LENGTH_SHORT).show();
+            }, 2000); // 延迟 500 毫秒
+            // 停止定位（防止重复回调）
+            mLocationClient.stopLocation();
+            mListener.onLocationChanged(aMapLocation);
+
+        } else {
+            Log.e("AmapError", "ErrCode:" + aMapLocation.getErrorCode());
+        }
+    }
+
+    private void showMsg(String msg){
+        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 初始化定位
+     */
+    private void initLocation() {
+        //初始化定位
+        try {
+            mLocationClient = new AMapLocationClient(getApplicationContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (mLocationClient != null) {
+            //设置定位回调监听
+            mLocationClient.setLocationListener(this);
+            //初始化AMapLocationClientOption对象
+            mLocationOption = new AMapLocationClientOption();
+            //设置定位模式为AMapLocationMode.Hight_Accuracy，高精度模式。
+            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            //获取最近3s内精度最高的一次定位结果：
+            //设置setOnceLocationLatest(boolean b)接口为true，启动定位时SDK会返回最近3s内精度最高的一次定位结果。如果设置其为true，setOnceLocation(boolean b)接口也会被设置为true，反之不会，默认为false。
+            mLocationOption.setOnceLocationLatest(true);
+            //设置是否返回地址信息（默认返回地址信息）
+            mLocationOption.setNeedAddress(true);
+            //设置定位请求超时时间，单位是毫秒，默认30000毫秒，建议超时时间不要低于8000毫秒。
+            mLocationOption.setHttpTimeOut(20000);
+            //关闭缓存机制，高精度定位会产生缓存。
+            mLocationOption.setLocationCacheEnable(false);
+            //给定位客户端对象设置定位参数
+            mLocationClient.setLocationOption(mLocationOption);
+        }
+    }
+
+    /**
+     * 请求权限结果
+     *
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+
+        if (requestCode == REQUEST_PERMISSIONS) {
+            List<String> perms = Arrays.asList(permissions);
+            if (EasyPermissions.hasPermissions(this, String.valueOf(perms))) {
+                mLocationClient.startLocation();
+            } else {
+                Toast.makeText(this, "权限不足，部分功能无法使用", Toast.LENGTH_SHORT).show();
+                // 可选：检测是否永久拒绝权限并引导至设置
+                if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+                    new AlertDialog.Builder(this)
+                            .setMessage("请前往设置手动开启定位权限")
+                            .setPositiveButton("去设置", (d, w) -> openAppSettings())
+                            .show();
+                }
+            }
+        }
+    }
+
+    private void openAppSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
+    }
+
+    /**
+     * Toast提示
+     *
+     * @param msg 提示内容
+     */
+    private void MyShowMsg(String msg) {
+        try {
+            LayoutInflater inflater = getLayoutInflater();
+            View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.custom_toast_container));
+
+            TextView text = layout.findViewById(R.id.custom_toast_message);
+            text.setText(msg);
+
+            Toast toast = new Toast(getApplicationContext());
+            toast.setDuration(Toast.LENGTH_SHORT);
+            toast.setView(layout);
+            toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 100);
+            toast.show();
+
+        } catch (Exception e) {
+            Log.e("Toast", e.toString());
+        }
+    }
+
+    /**
+     * 动态请求权限
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSIONS)
+    private void requestPermission() {
+        String[] permissions = {
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        };
+        if (EasyPermissions.hasPermissions(this, permissions)) {
+            mLocationClient.startLocation(); // 权限已授予，启动定位
+        } else {
+            EasyPermissions.requestPermissions(this, "需要定位权限", REQUEST_PERMISSIONS, permissions);
+        }
+    }
+
+    /**
+     * 检查Android版本
+     */
+    private void checkingAndroidVersion() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6.0+ 需动态权限
+            requestPermission();
+        } else {
+            // Android 6.0以下直接定位（无需动态权限）
+            mLocationClient.startLocation(); // ✅ 低版本系统安全启动定位
+        }
+    }
+
+}
