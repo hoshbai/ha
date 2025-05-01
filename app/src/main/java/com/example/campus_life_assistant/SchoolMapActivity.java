@@ -19,6 +19,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -29,7 +32,11 @@ import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.MapsInitializer;
 import com.amap.api.services.core.ServiceSettings;
+import com.example.campus_life_assistant.Adapter.PlaceAdapter;
+import com.example.campus_life_assistant.entry.Place;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -51,6 +58,11 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
     private AMap aMap = null;
     //位置更改监听
     private OnLocationChangedListener mListener;
+
+    private NestedScrollView bottomSheetContainer;
+    private FloatingActionButton fabShowPlaces;
+    private RecyclerView rvPlaceCards;
+    private PlaceAdapter placeAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,6 +87,7 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         initLocation();
         initMap(savedInstanceState);
         checkingAndroidVersion();
+        initPlacePanel();
     }
 
     @Override
@@ -97,7 +110,33 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         //在activity执行onPause时执行mMapView.onPause ()，暂停地图的绘制
         mapView.onPause();
     }
+    private void initPlacePanel() {
+        bottomSheetContainer = findViewById(R.id.bottom_sheet_container);
+        fabShowPlaces = findViewById(R.id.fab_show_places);
+        rvPlaceCards = findViewById(R.id.rv_place_cards);
 
+        // 初始化 RecyclerView
+        placeAdapter = new PlaceAdapter();
+        rvPlaceCards.setLayoutManager(new LinearLayoutManager(this));
+        rvPlaceCards.setAdapter(placeAdapter);
+
+        // 示例数据（可以替换为真实数据）
+        List<Place> places = new ArrayList<>();
+        places.add(new Place(R.drawable.library, "图书馆", "学校主图书馆，藏书丰富"));
+        places.add(new Place(R.drawable.canteen, "食堂", "学生餐厅，提供多样餐食"));
+        places.add(new Place(R.drawable.schoolmain, "率水校区", "率水校区大门"));
+        places.add(new Place(R.drawable.schoolmain2, "横江校区", "横江校区大门"));
+        placeAdapter.submitList(places);
+
+        // 浮动按钮点击事件
+        fabShowPlaces.setOnClickListener(v -> {
+            if (bottomSheetContainer.getVisibility() == View.GONE) {
+                bottomSheetContainer.setVisibility(View.VISIBLE);
+            } else {
+                bottomSheetContainer.setVisibility(View.GONE);
+            }
+        });
+    }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -256,29 +295,7 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         startActivity(intent);
     }
 
-    /**
-     * Toast提示
-     *
-     * @param msg 提示内容
-     */
-    private void MyShowMsg(String msg) {
-        try {
-            LayoutInflater inflater = getLayoutInflater();
-            View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.custom_toast_container));
 
-            TextView text = layout.findViewById(R.id.custom_toast_message);
-            text.setText(msg);
-
-            Toast toast = new Toast(getApplicationContext());
-            toast.setDuration(Toast.LENGTH_SHORT);
-            toast.setView(layout);
-            toast.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 100);
-            toast.show();
-
-        } catch (Exception e) {
-            Log.e("Toast", e.toString());
-        }
-    }
 
     /**
      * 动态请求权限
