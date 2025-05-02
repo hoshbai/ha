@@ -3,6 +3,7 @@ package com.example.campus_life_assistant.Adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,11 @@ import java.util.List;
 
 public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHolder> {
     private List<Place> places = new ArrayList<>();
+    private Context context;
+
+    public PlaceAdapter(Context context) {
+        this.context = context;
+    }
 
     public void submitList(List<Place> newData) {
         places.clear();
@@ -45,24 +51,23 @@ public class PlaceAdapter extends RecyclerView.Adapter<PlaceAdapter.PlaceViewHol
         holder.nameView.setText(place.getName());
         holder.descView.setText(place.getDescription());
 
-        // 点击事件：弹出路径选择对话框
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
+            Log.d("PlaceAdapter", "点击卡片，context 类型: " + context.getClass().getSimpleName());
 
-            // 获取当前位置
             double startLat = SchoolMapActivity.getCurrentLatitude();
             double startLon = SchoolMapActivity.getCurrentLongitude();
             double endLat = place.getLatitude();
             double endLon = place.getLongitude();
 
-            // 检查是否获取到当前位置
+            Log.d("PlaceAdapter", "起始坐标: " + startLat + ", " + startLon + " | 目标坐标: " + endLat + ", " + endLon);
+
             if (startLat == 0 && startLon == 0) {
                 Toast.makeText(context, "未获取到当前位置，请稍后再试", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // 弹出路径选择对话框
-            showNavigationOptionsDialog(context, startLat, startLon, endLat, endLon);
+            showNavigationOptionsDialog(this.context, startLat, startLon, endLat, endLon);
         });
     }
 

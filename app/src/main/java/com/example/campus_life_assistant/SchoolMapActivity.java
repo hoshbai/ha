@@ -142,7 +142,7 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
 
         // ✅ 设置定位样式（蓝色小箭头）
         MyLocationStyle myLocationStyle = new MyLocationStyle();
-        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER); // 显示方向旋转的蓝色箭头
+        myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE); // 显示方向旋转的蓝色箭头
         myLocationStyle.showMyLocation(true); // 显示定位图标
         myLocationStyle.strokeColor(Color.BLACK); // 边框颜色
         myLocationStyle.radiusFillColor(Color.argb(50, 0, 0, 255)); // 半透明蓝色圆圈
@@ -438,27 +438,74 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         fabShowPlaces = findViewById(R.id.fab_show_places);
         rvPlaceCards = findViewById(R.id.rv_place_cards);
 
-        placeAdapter = new PlaceAdapter();
+        placeAdapter = new PlaceAdapter(this);
         rvPlaceCards.setLayoutManager(new LinearLayoutManager(this));
         rvPlaceCards.setAdapter(placeAdapter);
 
         // 示例数据
         List<Place> places = new ArrayList<>();
         places.add(new Place(R.drawable.library, "图书馆", "学校主图书馆，藏书丰富"));
-        places.get(0).setLatitude(39.9042);  // 示例坐标
-        places.get(0).setLongitude(116.4074);
+        places.get(0).setLatitude(29.694277);  // 118.29364,29.694277
+        places.get(0).setLongitude(118.29364);
 
-        places.add(new Place(R.drawable.canteen, "食堂", "学生餐厅，提供多样餐食"));
-        places.get(1).setLatitude(39.9043);
-        places.get(1).setLongitude(116.4075);
+        places.add(new Place(R.drawable.canteen, "二食堂", "学生餐厅，提供多样餐食"));
+        places.get(1).setLatitude(29.688584);  //118.295892,29.688584
+        places.get(1).setLongitude(118.295892);
 
         places.add(new Place(R.drawable.schoolmain, "率水校区", "率水校区大门"));
-        places.get(2).setLatitude(39.9044);
-        places.get(2).setLongitude(116.4076);
+        places.get(2).setLatitude(29.694663);  //118.297084,29.694663
+        places.get(2).setLongitude(118.297084);
 
         places.add(new Place(R.drawable.schoolmain2, "横江校区", "横江校区大门"));
-        places.get(3).setLatitude(39.9045);
-        places.get(3).setLongitude(116.4077);
+        places.get(3).setLatitude(29.714472);  //118.293623,29.714472
+        places.get(3).setLongitude(118.293623);
+
+        places.add(new Place(R.drawable.schoolmain2, "文化传播学院", "文化传播学院"));
+        places.get(4).setLatitude(29.693073);  //118.292954,29.693073
+        places.get(4).setLongitude(118.292954);
+
+        places.add(new Place(R.drawable.schoolmain2, "文学院", "文学院"));
+        places.get(5).setLatitude(29.69178);  //118.291454,29.69178
+        places.get(5).setLongitude(118.291454);
+
+
+        places.add(new Place(R.drawable.schoolmain2, "信息工程学院", "信息工程学院"));
+        places.get(6).setLatitude(29.692271);  //118.289498,29.692271
+        places.get(6).setLongitude(118.289498);
+
+
+        places.add(new Place(R.drawable.schoolmain2, "旅游学院", "旅游学院"));
+        places.get(7).setLatitude(29.69272);  //118.289437,29.69272
+        places.get(7).setLongitude(118.289437);
+
+        places.add(new Place(R.drawable.schoolmain2, "体育学院", "体育学院"));
+        places.get(8).setLatitude(29.690833);  //118.290545,29.690833
+        places.get(8).setLongitude(118.290545);
+
+
+        places.add(new Place(R.drawable.schoolmain2, "机电学院", "机电学院"));
+        places.get(9).setLatitude(29.691588);  //118.290026,29.691588
+        places.get(9).setLongitude(118.290026);
+
+
+        places.add(new Place(R.drawable.schoolmain2, "建筑工程学院", "建筑工程学院"));
+        places.get(10).setLatitude(29.695858);  //118.29417,29.695858
+        places.get(10).setLongitude(118.29417);
+
+
+
+        places.add(new Place(R.drawable.schoolmain2, "黎阳in巷", "黎阳in巷"));
+        places.get(11).setLatitude(29.705864);  //118.297157,29.705864
+        places.get(11).setLongitude(118.297157);
+
+
+
+        places.add(new Place(R.drawable.schoolmain2, "屯溪老街", "屯溪老街"));
+        places.get(12).setLatitude(29.708415);  //118.310376,29.708415
+        places.get(12).setLongitude(118.310376);
+
+
+
 
         placeAdapter.submitList(places);
 
