@@ -135,7 +135,7 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         mapView = findViewById(R.id.map_view);
         mapView.onCreate(savedInstanceState);
         aMap = mapView.getMap();
-        aMap.setMaxZoomLevel(14);
+        aMap.setMaxZoomLevel(20);
         // ✅ 启用定位图层
         aMap.setLocationSource(this);
         aMap.setMyLocationEnabled(true);
@@ -145,7 +145,7 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER); // 显示方向旋转的蓝色箭头
         myLocationStyle.showMyLocation(true); // 显示定位图标
         myLocationStyle.strokeColor(Color.BLACK); // 边框颜色
-        myLocationStyle.radiusFillColor(Color.argb(100, 0, 0, 255)); // 半透明蓝色圆圈
+        myLocationStyle.radiusFillColor(Color.argb(50, 0, 0, 255)); // 半透明蓝色圆圈
         aMap.setMyLocationStyle(myLocationStyle);
 
         // ✅ 启用右下角默认定位按钮
@@ -209,14 +209,25 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     Toast.makeText(this, "地址：" + address, Toast.LENGTH_SHORT).show();
                 }, 2000);
-
-                // ✅ 移动地图到当前位置
                 if (aMap != null) {
+                    // ✅ 先通知地图更新定位图标
+                    if (mListener != null) {
+                        mListener.onLocationChanged(aMapLocation);
+                    }
+
+                    // ✅ 移动地图到当前位置
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                             new LatLng(currentLatitude, currentLongitude), 15f));
+
+                    // ✅ 延迟停止定位，确保地图有时间渲染图标
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (mLocationClient != null) {
+                            mLocationClient.stopLocation();
+                        }
+                    }, 1000);
                 }
 
-                isFirstLocation = false; // ✅ 标记为非首次定位
+                isFirstLocation = false;
             } else {
                 // ✅ 后续定位仅更新坐标，不弹窗
                 Log.d("LocationUpdate", "更新位置：" + currentLatitude + ", " + currentLongitude);
@@ -292,6 +303,9 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
     protected void onPause() {
         super.onPause();
         mapView.onPause();
+        if (mLocationClient != null) {
+            mLocationClient.stopLocation(); // 暂停定位
+        }
     }
 
     // 恢复地图
@@ -299,6 +313,12 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+        if (mLocationClient != null) {
+            mLocationClient.startLocation(); // 重新开始定位
+        }
+        if (aMap != null) {
+            aMap.setMyLocationEnabled(true); // 重新启用定位图层
+        }
     }
 
     // 销毁地图

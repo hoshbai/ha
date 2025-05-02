@@ -11,20 +11,20 @@
     <com.amap.api.maps.MapView
         android:id="@+id/map_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_show_places"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:backgroundTint="#FF9800"
+            android:contentDescription="查看地点"
+            android:src="@drawable/ic_schoolmap"
+            app:tint="#FFFFFF" />
+    </com.amap.api.maps.MapView>
 
     <!-- 浮动按钮（触发地点面板） -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_show_places"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_schoolmap"
-        app:tint="#FFFFFF"
-        android:backgroundTint="#FF9800"
-        android:contentDescription="查看地点" />
 
     <!-- 可滑动的底部面板（地点列表） -->
     <androidx.core.widget.NestedScrollView
