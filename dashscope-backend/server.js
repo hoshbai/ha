@@ -6,23 +6,52 @@ import os from 'node:os'; // 用于获取本机IP
 // 加载环境变量
 dotenv.config();
 
-// 获取本机非内网IPv4地址
+
 function getServerIP() {
     const interfaces = os.networkInterfaces();
+
+    let ethernetIP = null;
+    let wifiIP = null;
+
     for (const name of Object.keys(interfaces)) {
         for (const intf of interfaces[name]) {
             if (
                 intf.family === 'IPv4' &&
-                !intf.internal && // 排除内网地址
-                !name.startsWith('docker') && // 排除 Docker 网络
-                !name.startsWith('veth') // 排除虚拟网卡
+                !intf.internal // 排除回环地址
             ) {
-                return intf.address;
+                // 排除虚拟机和虚拟网卡
+                if (
+                    name.includes('VMware') ||
+                    name.includes('vEthernet') ||
+                    name.includes('Docker') ||
+                    name.includes('Loopback')
+                ) {
+                    continue;
+                }
+
+                // 判断是否是以太网（包含 "以太网" 或 "Ethernet"）
+                const isEthernet =
+                    name.includes('以太网') || name.toLowerCase().includes('ethernet');
+
+                // 判断是否是无线网络（包含 "WLAN" 或 "Wi-Fi" 或 "WiFi"）
+                const isWiFi =
+                    name.includes('WLAN') ||
+                    name.toLowerCase().includes('wi-fi') ||
+                    name.toLowerCase().includes('wifi');
+
+                // 只记录第一个有效 IP（避免重复）
+                if (isEthernet && !ethernetIP) {
+                    ethernetIP = intf.address;
+                } else if (isWiFi && !wifiIP) {
+                    wifiIP = intf.address;
+                }
             }
         }
     }
-    return 'localhost'; // 默认回退
+
+    return ethernetIP || wifiIP || 'localhost';
 }
+
 
 // 初始化 OpenAI 客户端
 const openai = new OpenAI({
