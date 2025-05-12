@@ -59,4 +59,6 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.1'
 //    implementation 'com.amap.api:map:latest.version' //添加高德地图SDK依赖
 
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
 }
