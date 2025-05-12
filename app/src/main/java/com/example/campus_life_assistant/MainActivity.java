@@ -30,7 +30,6 @@ import java.util.concurrent.ExecutorService; // Import ExecutorService
 import java.util.concurrent.Executors; // Import Executors
 
 public class MainActivity extends AppCompatActivity {
-
     private static final String TAG = "MainActivity";
     private BottomNavigationView bottomNavigationView;
     private TextView connectionStatusText;

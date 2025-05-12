@@ -21,9 +21,9 @@ public class DatabaseHelper {
     private static final String DB_PASSWORD = "FengKefeng520!";
 
     // Backup local connection configuration
-    private static final String LOCAL_DB_URL = "jdbc:mysql://10.0.2.2:13306/ad?connectTimeout=3000&socketTimeout=5000"; // Added timeouts
+    private static final String LOCAL_DB_URL = "jdbc:mysql://192.168.150.251:3306/ad?connectTimeout=3000&socketTimeout=5000"; // Added timeouts
     private static final String LOCAL_DB_USER = "root";
-    private static final String LOCAL_DB_PASSWORD = "Zhang200412@";
+    private static final String LOCAL_DB_PASSWORD = "123456";
 
     private static final String TABLE_USERS = "users";
     private Context context; // Context might not be strictly needed here unless used elsewhere
