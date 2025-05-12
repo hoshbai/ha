@@ -18,7 +18,7 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
-    @GetMapping("/admin")
+    @GetMapping("/user")
     public ResponseEntity<User> getAdmin(@RequestParam String name) {
         User user = userMapper.selectByName(name);
         if (user != null) {
