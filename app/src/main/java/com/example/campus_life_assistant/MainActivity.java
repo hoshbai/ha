@@ -49,6 +49,11 @@ public class MainActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this); // Initialize DatabaseHelper
 
+        // 将连接状态面板隐藏
+        View statusPanel = findViewById(R.id.connection_status_panel);
+        if (statusPanel != null) {
+            statusPanel.setVisibility(View.GONE);
+        }
         // Initialize UI elements
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         connectionStatusText = findViewById(R.id.connection_status_text);
