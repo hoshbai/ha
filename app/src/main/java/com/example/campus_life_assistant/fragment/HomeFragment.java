@@ -12,10 +12,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.campus_life_assistant.CanteenActivity;
+import com.example.campus_life_assistant.LibraryActivity;
 import com.example.campus_life_assistant.R;
-import com.example.campus_life_assistant.RepairActivity;
 import com.example.campus_life_assistant.ScheduleActivity;
-import com.example.campus_life_assistant.StuCardActivity;
 import com.example.campus_life_assistant.SuSheMainActivity;
 
 public class HomeFragment extends Fragment {
@@ -41,10 +40,10 @@ public class HomeFragment extends Fragment {
 
         // 图书馆卡片
         view.findViewById(R.id.libraryCard).setOnClickListener(v -> {
-            Toast.makeText(getContext(), "跳转到图书馆界面 跳转逻辑待实现", Toast.LENGTH_SHORT).show();
-
-            // 跳转逻辑待实现
+            Intent intent = new Intent(getActivity(), LibraryActivity.class);
+            startActivity(intent);
         });
+
 
         // 食堂卡片
         view.findViewById(R.id.canteenCard).setOnClickListener(v -> {
