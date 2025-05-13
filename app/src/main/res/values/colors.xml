@@ -75,4 +75,7 @@
     <color name="md_theme_dark_background">#191C1A</color>
     <color name="md_theme_dark_onBackground">#E1E3DF</color>
 
+    <color name="color_lost">#E57373</color> <!-- 寻物启事颜色 -->
+    <color name="color_found">#81C784</color> <!-- 招领启事颜色 -->
+
 </resources>
