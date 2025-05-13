@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.example.campus_life_assistant.AIChatActivity;
 import com.example.campus_life_assistant.CampusEventsActivity;
 import com.example.campus_life_assistant.CanteenActivity;
+import com.example.campus_life_assistant.LibraryActivity;
 import com.example.campus_life_assistant.LostFoundActivity;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.RepairActivity;
@@ -45,8 +46,9 @@ public class HomeFragment extends Fragment {
 
         // 图书馆卡片
         view.findViewById(R.id.libraryCard).setOnClickListener(v -> {
-            Toast.makeText(getContext(), "跳转到图书馆界面 跳转逻辑待实现", Toast.LENGTH_SHORT).show();
-
+//            Toast.makeText(getContext(), "跳转到图书馆界面 跳转逻辑待实现", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), LibraryActivity.class);
+            startActivity(intent);
             // 跳转逻辑待实现
         });
 
