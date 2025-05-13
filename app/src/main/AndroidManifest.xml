@@ -71,6 +71,10 @@
             android:name=".AIChatActivity"
             android:exported="true" />
         <activity
+            android:name=".LibraryActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".SuSheAnnouncementDetailActivity"
             android:exported="false" />
         <activity
@@ -92,8 +96,9 @@
             android:name=".RepairActivity"
             android:exported="true" />
         <activity
-            android:name=".CanteenActivity"
+            android:name="com.example.campus_life_assistant.CanteenActivity"
             android:exported="true" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="true" /> <!-- 移除intent-filter -->

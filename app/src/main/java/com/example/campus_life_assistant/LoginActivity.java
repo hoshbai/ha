@@ -2,13 +2,29 @@ package com.example.campus_life_assistant;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campus_life_assistant.Dao.DatabaseHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,19 +55,9 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "请填写用户名和密码", Toast.LENGTH_SHORT).show();
                 } else {
                     // 调用数据库方法检查用户凭据（异步）
-                    dbHelper.checkUserCredentials(username, password, success -> {
-                        if (success) {
-                            runOnUiThread(() -> {
-                                Toast.makeText(LoginActivity.this, "登录成功！", Toast.LENGTH_SHORT).show();
-                                // 移除跳转到主界面的代码
-                            });
-                        } else {
-                            runOnUiThread(() -> {
-                                Toast.makeText(LoginActivity.this, "用户名或密码错误", Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    });
+                    sendTestRequest(username,password);
                 }
+
             }
         });
 
@@ -60,6 +66,76 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(LoginActivity.this, RegisterActivity.class)); // 跳转到注册界面
+            }
+        });
+
+    }
+
+    private void sendTestRequest(String username, String password) {
+        // 创建 OkHttpClient 实例
+        OkHttpClient client = new OkHttpClient();
+
+        // 构建请求地址
+        String url = "http://10.0.2.2:8081/api/login";
+
+        // 构建 JSON 参数
+        JSONObject jsonParam = new JSONObject();
+        try {
+            jsonParam.put("username", username);
+            jsonParam.put("password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        RequestBody body = RequestBody.create(
+                jsonParam.toString(),
+                MediaType.get("application/json; charset=utf-8")
+        );
+
+        // 构建请求对象
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+
+        // 异步请求
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(LoginActivity.this, "请求失败: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("OkHttp", "请求失败", e);
+                });
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        String responseData = response.body().string();
+                        JSONObject jsonObject = new JSONObject(responseData);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(LoginActivity.this, "响应成功: " + jsonObject.toString(), Toast.LENGTH_LONG).show();
+                            Log.d("OkHttp", "响应数据: " + jsonObject.toString());
+
+                            // 在这里可以解析 JSON 数据并做后续处理
+                            // 例如：
+                            // String message = jsonObject.getString("message");
+                        });
+                    } catch (JSONException e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(LoginActivity.this, "JSON 解析错误", Toast.LENGTH_SHORT).show();
+                            Log.e("OkHttp", "JSON 解析失败", e);
+                        });
+                    }
+                } else {
+                    runOnUiThread(() -> {
+                        Toast.makeText(LoginActivity.this, "请求失败，状态码：" + response.code(), Toast.LENGTH_SHORT).show();
+                        Log.e("OkHttp", "请求失败，状态码: " + response.code());
+                    });
+                }
             }
         });
     }
