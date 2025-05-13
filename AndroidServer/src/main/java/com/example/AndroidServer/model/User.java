@@ -1,41 +1,50 @@
 package com.example.AndroidServer.model;
 
 public class User {
-    private Integer id;
-    private String aName;
-    private String aPsd;
-    private String aTime;
+    private Integer u_id;
+    private String u_name;
+    private String u_password;
+    private String create_time; // 如果数据库中还有时间字段，比如 create_time
 
-    public Integer getId() {
-        return id;
+    public Integer getU_id() {
+        return u_id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setU_id(Integer u_id) {
+        this.u_id = u_id;
     }
 
-    public String getaName() {
-        return aName;
+    public String getU_name() {
+        return u_name;
     }
 
-    public void setaName(String aName) {
-        this.aName = aName;
+    public void setU_name(String u_name) {
+        this.u_name = u_name;
     }
 
-    public String getaPsd() {
-        return aPsd;
+    public String getU_password() {
+        return u_password;
     }
 
-    public void setaPsd(String aPsd) {
-        this.aPsd = aPsd;
+    public void setU_password(String u_password) {
+        this.u_password = u_password;
     }
 
-    public String getaTime() {
-        return aTime;
+    public String getCreate_time() {
+        return create_time;
     }
 
-    public void setaTime(String aTime) {
-        this.aTime = aTime;
+    public void setCreate_time(String create_time) {
+        this.create_time = create_time;
     }
-// Getter / Setter
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "u_id=" + u_id +
+                ", u_name='" + u_name + '\'' +
+                ", u_password='" + u_password + '\'' +
+                ", create_time='" + create_time + '\'' +
+                '}';
+    }
 }
