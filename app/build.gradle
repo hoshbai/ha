@@ -24,8 +24,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
 }
@@ -46,7 +46,11 @@ dependencies {
     implementation libs.constraintlayout
     implementation 'mysql:mysql-connector-java:5.1.49'
     implementation libs.recyclerview
-   implementation files('src/main/libs/AMap3DMap_10.1.201_AMapNavi_10.1.201_AMapSearch_9.7.4_AMapLocation_6.4.9_20250326.jar')
+    implementation files('src/main/libs/AMap3DMap_10.1.201_AMapNavi_10.1.201_AMapSearch_9.7.4_AMapLocation_6.4.9_20250326.jar')
+    
+    // 添加SwipeRefreshLayout依赖
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

@@ -30,6 +30,8 @@ import java.util.concurrent.ExecutorService; // Import ExecutorService
 import java.util.concurrent.Executors; // Import Executors
 
 public class MainActivity extends AppCompatActivity {
+
+
     private static final String TAG = "MainActivity";
     private BottomNavigationView bottomNavigationView;
     private TextView connectionStatusText;
@@ -44,16 +46,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        dbHelper = new DatabaseHelper(this); // Initialize DatabaseHelper
-
         // 将连接状态面板隐藏
         View statusPanel = findViewById(R.id.connection_status_panel);
         if (statusPanel != null) {
             statusPanel.setVisibility(View.GONE);
         }
+        dbHelper = new DatabaseHelper(this); // Initialize DatabaseHelper
+
         // Initialize UI elements
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         connectionStatusText = findViewById(R.id.connection_status_text);
@@ -326,4 +328,5 @@ public class MainActivity extends AppCompatActivity {
             executorService.shutdown();
         }
     }
+
 }

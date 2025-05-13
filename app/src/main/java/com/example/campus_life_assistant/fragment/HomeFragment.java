@@ -12,8 +12,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.campus_life_assistant.AIChatActivity;
+import com.example.campus_life_assistant.CampusEventsActivity;
 import com.example.campus_life_assistant.CanteenActivity;
 import com.example.campus_life_assistant.LibraryActivity;
+import com.example.campus_life_assistant.LostFoundActivity;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.RepairActivity;
 import com.example.campus_life_assistant.ScheduleActivity;
@@ -44,8 +46,10 @@ public class HomeFragment extends Fragment {
 
         // 图书馆卡片
         view.findViewById(R.id.libraryCard).setOnClickListener(v -> {
+//            Toast.makeText(getContext(), "跳转到图书馆界面 跳转逻辑待实现", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(getActivity(), LibraryActivity.class);
             startActivity(intent);
+            // 跳转逻辑待实现
         });
 
         // 食堂卡片
@@ -76,6 +80,20 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getActivity(), SchoolMapActivity.class);
             startActivity(intent);
             // 跳转逻辑待实现
+        });
+        
+        // 校园活动卡片
+        view.findViewById(R.id.eventsCard).setOnClickListener(v -> {
+            Toast.makeText(getContext(), "跳转到校园活动界面", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), CampusEventsActivity.class);
+            startActivity(intent);
+        });
+        
+        // 失物招领卡片
+        view.findViewById(R.id.lostFoundCard).setOnClickListener(v -> {
+            Toast.makeText(getContext(), "跳转到失物招领界面", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), LostFoundActivity.class);
+            startActivity(intent);
         });
     }
 }

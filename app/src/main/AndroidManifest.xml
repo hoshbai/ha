@@ -41,6 +41,26 @@
             android:value="34fad77680d92978fde97015be1605c3">
 
         </meta-data>
+        
+        <!-- 校园活动相关Activity -->
+        <activity
+            android:name=".CampusEventsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".EventDetailActivity"
+            android:exported="false" />
+            
+        <!-- 失物招领Activity -->
+        <activity
+            android:name=".LostFoundActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AddLostFoundActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LostFoundDetailActivity"
+            android:exported="false" />
+            
         <activity
             android:name=".SchoolMapActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
