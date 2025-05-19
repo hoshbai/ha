@@ -2,6 +2,8 @@ package com.example.campus_life_assistant;
 
 import android.app.AlertDialog;
 import android.content.Context; // Import Context
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager; // Import ConnectivityManager
 import android.net.NetworkCapabilities; // Use NetworkCapabilities for modern check
 import android.net.NetworkInfo; // Keep for older API levels if needed, but prefer NetworkCapabilities
@@ -49,6 +51,19 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // 检查用户是否已登录
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        String username = sharedPref.getString("username", null);
+        String token = sharedPref.getString("token", null);
+        if (username == null || token == null) {
+            // 用户未登录，跳转到 LoginActivity
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // 清除当前栈
+            startActivity(intent);
+            finish(); // 关闭当前 MainActivity
+            return; // 提前返回，避免继续执行后续代码
+        }
         // 将连接状态面板隐藏
         View statusPanel = findViewById(R.id.connection_status_panel);
         if (statusPanel != null) {

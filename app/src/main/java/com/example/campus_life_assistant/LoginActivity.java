@@ -1,6 +1,8 @@
 package com.example.campus_life_assistant;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.campus_life_assistant.Dao.DatabaseHelper;
+import com.example.campus_life_assistant.model.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "请填写用户名和密码", Toast.LENGTH_SHORT).show();
                 } else {
                     // 调用数据库方法检查用户凭据（异步）
-                    sendTestRequest(username,password);
+                    userLoginRequest(username,password);
                 }
 
             }
@@ -70,8 +73,14 @@ public class LoginActivity extends AppCompatActivity {
         });
 
     }
-
-    private void sendTestRequest(String username, String password) {
+    private void saveUserToSession(User user) {
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("username", user.getUsername());
+        editor.putString("token", user.getToken()); // 如果有 token
+        editor.apply();
+    }
+    private void userLoginRequest(String username, String password) {
         // 创建 OkHttpClient 实例
         OkHttpClient client = new OkHttpClient();
 
@@ -116,13 +125,22 @@ public class LoginActivity extends AppCompatActivity {
                         String responseData = response.body().string();
                         JSONObject jsonObject = new JSONObject(responseData);
 
-                        runOnUiThread(() -> {
-                            Toast.makeText(LoginActivity.this, "响应成功: " + jsonObject.toString(), Toast.LENGTH_LONG).show();
-                            Log.d("OkHttp", "响应数据: " + jsonObject.toString());
+                        // 假设后端返回结构是：{ "username": "xxx", "token": "yyy" }
+                        String username = jsonObject.getString("username");
+                        String token = jsonObject.getString("token");
 
-                            // 在这里可以解析 JSON 数据并做后续处理
-                            // 例如：
-                            // String message = jsonObject.getString("message");
+                        User user = new User(username, token);
+
+                        // 保存用户信息到本地
+                        saveUserToSession(user);
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(LoginActivity.this, "登录成功！", Toast.LENGTH_SHORT).show();
+
+                            // 跳转到 MainActivity
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // 清除栈内其他 Activity
+                            startActivity(intent);
                         });
                     } catch (JSONException e) {
                         runOnUiThread(() -> {
