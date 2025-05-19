@@ -23,29 +23,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-<!--    <repositories>-->
-<!--        &lt;!&ndash; 使用中央仓库 &ndash;&gt;-->
-<!--        <repository>-->
-<!--            <id>central</id>-->
-<!--            <url>https://repo.maven.apache.org/maven2</url>-->
-<!--        </repository>-->
-<!--        &lt;!&ndash; 使用 Spring 官方仓库 &ndash;&gt;-->
-<!--        <repository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <url>https://repo.spring.io/repository/public/</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
-
-<!--    <pluginRepositories>-->
-<!--        <pluginRepository>-->
-<!--            <id>central</id>-->
-<!--            <url>https://repo.maven.apache.org/maven2</url>-->
-<!--        </pluginRepository>-->
-<!--        <pluginRepository>-->
-<!--            <id>spring-releases</id>-->
-<!--            <url>https://repo.spring.io/repository/public/</url>-->
-<!--        </pluginRepository>-->
-<!--    </pluginRepositories>-->
 
     <dependencies>
         <!-- Spring Web -->
@@ -53,8 +30,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
-
 
         <!-- Lombok（简化 POJO） -->
         <dependency>
@@ -72,6 +47,25 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.49</version> <!-- 5.7 推荐使用 JDBC 5.x -->
         </dependency>
+
+<!--============JWT 依赖  token验证===============-->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.11.5</version>
+        </dependency>
+<!--============================================== -->
+
     </dependencies>
 
     <!-- 添加 Spring Boot Maven 插件 -->

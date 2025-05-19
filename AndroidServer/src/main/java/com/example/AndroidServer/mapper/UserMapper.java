@@ -14,4 +14,8 @@ public interface UserMapper {
 
     @Insert("INSERT INTO user (u_name, u_password) VALUES (#{name}, #{password})")
     void insertByRegister(@Param("name") String name, @Param("password") String password);
+    @Select("SELECT * FROM user WHERE u_name = #{name}")
+    User selectByNameOnly(@Param("name") String name);
+    @Select("SELECT COUNT(*) FROM user WHERE u_name = #{name}")
+    int countByName(@Param("name") String name);
 }
