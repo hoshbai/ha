@@ -1,6 +1,6 @@
 package com.example.AndroidServer.model;
 
-public class LoginRequest {
+public class UserRequest {
     private String username;
     private String password;
 
