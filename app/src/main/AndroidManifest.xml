@@ -41,15 +41,21 @@
             android:value="34fad77680d92978fde97015be1605c3">
 
         </meta-data>
-        
+
         <!-- 校园活动相关Activity -->
+        <activity
+            android:name=".activity.BookDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
         <activity
             android:name=".CampusEventsActivity"
             android:exported="true" />
         <activity
             android:name=".EventDetailActivity"
             android:exported="false" />
-            
+
+
         <!-- 失物招领Activity -->
         <activity
             android:name=".LostFoundActivity"
@@ -60,7 +66,7 @@
         <activity
             android:name=".LostFoundDetailActivity"
             android:exported="false" />
-            
+
         <activity
             android:name=".SchoolMapActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -101,8 +107,8 @@
 
         <!-- 修改后的StuCardActivity配置 -->
         <activity
-        android:name=".StuCardActivity"
-        android:exported="true" /> <!-- 必须设置为true -->
+            android:name=".StuCardActivity"
+            android:exported="true" /> <!-- 必须设置为true -->
         <!-- <activity -->
         <!-- android:name=".HomeActivity" -->
         <activity android:name=".FoodDetailActivity" /> <!-- android:exported="true" /> -->

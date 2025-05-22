@@ -1,53 +1,23 @@
 package com.example.campus_life_assistant.model;
 
+import com.google.gson.annotations.SerializedName;
+
 public class LibraryNotification {
-    public static final int TYPE_DUE_SOON = 1;
-    public static final int TYPE_OVERDUE = 2;
-    public static final int TYPE_ANNOUNCEMENT = 3;
-    public static final int TYPE_RECOMMENDATION = 4;
+    @SerializedName("id")
+    private int id;
 
-    private int type;
-    private String title;
-    private String content;
-    private long timestamp;
+    @SerializedName("message")
+    private String message;
 
-    public LibraryNotification(int type, String title, String content, long timestamp) {
-        this.type = type;
-        this.title = title;
-        this.content = content;
-        this.timestamp = timestamp;
-    }
+    @SerializedName("date")
+    private String date;
 
-    // Getters and Setters
-    public int getType() {
-        return type;
-    }
+    // —— getters & setters —— //
 
-    public void setType(int type) {
-        this.type = type;
-    }
+    public int getId() { return id; }
+    public String getMessage() { return message; }
+    public String getDate() { return date; }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
+    public void setMessage(String message) { this.message = message; }
+    public void setDate(String date) { this.date = date; }
 }
