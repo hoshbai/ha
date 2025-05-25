@@ -64,7 +64,7 @@ public class CampusCardActivity extends AppCompatActivity {
 
         btnInternetFee.setOnClickListener(v -> {
             // TODO: 跳转到网费页面
-            android.content.Intent intent = new android.content.Intent(this, com.tencent.campuslife.activity.campuscard.activity.InternetFeeActivity.class);
+            android.content.Intent intent = new android.content.Intent(this, InternetFeeActivity.class);
             startActivity(intent);
         });
 

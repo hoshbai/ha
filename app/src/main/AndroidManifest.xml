@@ -153,7 +153,7 @@
             android:name=".campuscard.activity.CardRechargeActivity"
             android:exported="false" />
         <activity
-            android:name="com.tencent.campuslife.activity.campuscard.activity.InternetFeeActivity"
+            android:name=".campuscard.activity.InternetFeeActivity"
             android:exported="false" />
         <activity
             android:name=".campuscard.activity.LossUnlossActivity"

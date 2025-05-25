@@ -1,4 +1,4 @@
-package com.tencent.campuslife.activity.campuscard.activity;
+package com.example.campus_life_assistant.campuscard.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
