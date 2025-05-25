@@ -144,6 +144,21 @@
             android:name=".campuscard.activity.CampusCardActivity"
             android:exported="false" />
 
+
+        <!-- 校园卡管理子功能Activity -->
+        <activity
+            android:name=".campuscard.activity.BillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.CardRechargeActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.tencent.campuslife.activity.campuscard.activity.InternetFeeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.LossUnlossActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
