@@ -105,5 +105,12 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getActivity(), com.example.campus_life_assistant.news.activity.NewsListActivity.class);
             startActivity(intent);
         });
+
+        // 校园卡管理卡片
+        view.findViewById(R.id.campusCard).setOnClickListener(v -> {
+            Toast.makeText(getContext(), "跳转到校园卡管理", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), com.example.campus_life_assistant.campuscard.activity.CampusCardActivity.class);
+            startActivity(intent);
+        });
     }
 }
