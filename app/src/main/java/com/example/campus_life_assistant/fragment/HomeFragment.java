@@ -22,6 +22,7 @@ import com.example.campus_life_assistant.ScheduleActivity;
 import com.example.campus_life_assistant.SchoolMapActivity;
 import com.example.campus_life_assistant.StuCardActivity;
 import com.example.campus_life_assistant.SuSheMainActivity;
+import com.example.campus_life_assistant.news.activity.NewsListActivity;
 
 public class HomeFragment extends Fragment {
 
@@ -90,9 +91,18 @@ public class HomeFragment extends Fragment {
         });
         
         // 失物招领卡片
-        view.findViewById(R.id.lostFoundCard).setOnClickListener(v -> {
-            Toast.makeText(getContext(), "跳转到失物招领界面", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getActivity(), LostFoundActivity.class);
+        view.findViewById(R.id.lostFoundCard).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "跳转到失物招领界面", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), LostFoundActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // 新闻资讯卡片
+        view.findViewById(R.id.newsCard).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), com.example.campus_life_assistant.news.activity.NewsListActivity.class);
             startActivity(intent);
         });
     }

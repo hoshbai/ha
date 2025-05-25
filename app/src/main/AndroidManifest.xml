@@ -130,6 +130,14 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
+
+        <!-- 新闻模块相关Activity -->
+        <activity
+            android:name=".news.activity.NewsListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".news.activity.NewsDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
