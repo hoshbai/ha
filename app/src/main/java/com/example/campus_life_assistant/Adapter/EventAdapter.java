@@ -54,6 +54,28 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         holder.organizerTextView.setText(event.getOrganizer());
         holder.categoryTextView.setText(event.getCategory());
         
+        // 根据活动类别设置不同的图片
+        switch (event.getCategory()) {
+            case "讲座":
+                holder.eventImageView.setImageResource(R.drawable.img_lectures);
+                break;
+            case "竞赛":
+                holder.eventImageView.setImageResource(R.drawable.img_innovation);
+                break;
+            case "文娱":
+                holder.eventImageView.setImageResource(R.drawable.img_campus_singer);
+                break;
+            case "体育":
+                holder.eventImageView.setImageResource(R.drawable.img_basketball);
+                break;
+            case "实践":
+                holder.eventImageView.setImageResource(R.drawable.img_practice);
+                break;
+            default:
+                holder.eventImageView.setImageResource(R.drawable.img_lectures);
+                break;
+        }
+        
         // 设置按钮状态
         if (event.isRegistered()) {
             holder.registerButton.setText("已报名");
