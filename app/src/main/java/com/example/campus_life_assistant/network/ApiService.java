@@ -1,7 +1,9 @@
 // ApiService.java
 package com.example.campus_life_assistant.network;
 
+import com.example.campus_life_assistant.model.ChargeHistory;
 import com.example.campus_life_assistant.model.Book;
+import com.example.campus_life_assistant.model.Dormitory;
 import com.example.campus_life_assistant.model.LibraryNotification;
 
 import java.util.List;
@@ -38,4 +40,16 @@ public interface ApiService {
     // ✅ 修正前："library/books/{id}/status" → 保持原本正确
     @POST("library/books/{id}/status")
     Call<Void> updateBookStatus(@Path("id") int id, @Query("status") String status);
+
+//宿舍部分
+    @GET("sushe/loadChargeHistory")
+    Call<List<ChargeHistory>> getChargeHistory(
+            @Query("buildingNo") String buildingNo,
+            @Query("roomNo") String roomNo
+    );
+    @GET("sushe/getBalance")
+    Call<Dormitory> getBalance(
+            @Query("buildingNo") String buildingNo,
+            @Query("roomNo") String roomNo
+    );
 }
