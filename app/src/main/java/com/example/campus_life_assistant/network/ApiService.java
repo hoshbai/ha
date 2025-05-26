@@ -1,6 +1,7 @@
 // ApiService.java
 package com.example.campus_life_assistant.network;
 
+import com.example.campus_life_assistant.model.BasicResponse;
 import com.example.campus_life_assistant.model.ChargeHistory;
 import com.example.campus_life_assistant.model.Book;
 import com.example.campus_life_assistant.model.Dormitory;
@@ -9,6 +10,7 @@ import com.example.campus_life_assistant.model.LibraryNotification;
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -46,4 +48,15 @@ public interface ApiService {
             @Query("buildingNo") String buildingNo,
             @Query("roomNo") String roomNo
     );
+    @GET("sushe/dormitoryInfo")
+    Call<Dormitory> getDormitoryInfo(
+            @Query("username") String username
+    );
+
+    @GET("sushe/getAllDormitories")
+    Call<List<Dormitory>> getAllDormitories();
+
+
+    @POST("sushe/updateDormitory")
+    Call<Boolean> updateDormitory(@Body Dormitory dormitory);
 }
