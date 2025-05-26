@@ -72,7 +72,7 @@ public class LostFoundDetailActivity extends AppCompatActivity {
         locationTextView = findViewById(R.id.lost_found_detail_location);
         descriptionTextView = findViewById(R.id.lost_found_detail_description);
         contactTextView = findViewById(R.id.lost_found_detail_contact);
-        publishInfoTextView = findViewById(R.id.lost_found_detail_publish_info);
+        publishInfoTextView = findViewById(R.id.lost_found_detail_publisher);
         itemImageView = findViewById(R.id.lost_found_detail_image);
         contactButton = findViewById(R.id.lost_found_detail_contact_btn);
         completeButton = findViewById(R.id.lost_found_detail_complete_btn);
@@ -107,8 +107,8 @@ public class LostFoundDetailActivity extends AppCompatActivity {
         publishInfo += " | 发布时间: " + dateFormat.format(item.getPublishTime());
         publishInfoTextView.setText(publishInfo);
         
-        // 设置图片（使用默认图片）
-        itemImageView.setImageResource(R.drawable.ic_launcher_foreground);
+        // 根据物品类别设置对应的图片
+        itemImageView.setImageResource(item.getItemImageResourceId());
         
         // 设置按钮状态
         if (item.isCompleted()) {
@@ -126,15 +126,9 @@ public class LostFoundDetailActivity extends AppCompatActivity {
         });
         
         completeButton.setOnClickListener(v -> {
-            if (!item.isCompleted()) {
-                String message = item.getItemType() == LostFoundItem.TYPE_LOST ? 
-                        "恭喜你找回了物品！" : "物品已成功归还失主！";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                
-                item.setCompleted(true);
-                completeButton.setText("已完成");
-                completeButton.setEnabled(false);
-            }
+            item.setCompleted(true);
+            updateUI();
+            Toast.makeText(this, "状态已更新", Toast.LENGTH_SHORT).show();
         });
     }
     

@@ -151,7 +151,7 @@ public class EventListFragment extends Fragment implements EventAdapter.OnEventC
                     startTime,
                     endTime,
                     "计算机科学学院",
-                    "https://example.com/ai_seminar.jpg",
+                    "img_lectures",
                     "讲座"
             ));
         }
@@ -171,7 +171,7 @@ public class EventListFragment extends Fragment implements EventAdapter.OnEventC
                     startTime,
                     endTime,
                     "校团委学生会",
-                    "https://example.com/singing_contest.jpg",
+                    "img_campus_singer",
                     "文娱"
             ));
         }
@@ -191,7 +191,7 @@ public class EventListFragment extends Fragment implements EventAdapter.OnEventC
                     startTime,
                     endTime,
                     "体育部",
-                    "https://example.com/basketball_league.jpg",
+                    "img_basketball",
                     "体育"
             ));
         }
@@ -211,7 +211,7 @@ public class EventListFragment extends Fragment implements EventAdapter.OnEventC
                     startTime,
                     endTime,
                     "创新创业学院",
-                    "https://example.com/innovation_competition.jpg",
+                    "img_innovation",
                     "竞赛"
             ));
         }
@@ -231,7 +231,7 @@ public class EventListFragment extends Fragment implements EventAdapter.OnEventC
                     startTime,
                     endTime,
                     "校团委",
-                    "https://example.com/social_practice.jpg",
+                    "img_practice",
                     "实践"
             ));
         }

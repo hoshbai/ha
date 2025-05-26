@@ -64,9 +64,27 @@ public class EventDetailActivity extends AppCompatActivity {
         categoryTextView.setText(event.getCategory());
         descriptionTextView.setText(event.getDescription());
 
-        // 设置图片资源（实际应用中应该使用图片加载库如Glide）
-        // 此处使用了占位图
-        imageView.setImageResource(R.drawable.ic_launcher_foreground);
+        // 根据活动类别设置不同的图片
+        switch (event.getCategory()) {
+            case "讲座":
+                imageView.setImageResource(R.drawable.img_lectures);
+                break;
+            case "竞赛":
+                imageView.setImageResource(R.drawable.img_innovation);
+                break;
+            case "文娱":
+                imageView.setImageResource(R.drawable.img_campus_singer);
+                break;
+            case "体育":
+                imageView.setImageResource(R.drawable.img_basketball);
+                break;
+            case "实践":
+                imageView.setImageResource(R.drawable.img_practice);
+                break;
+            default:
+                imageView.setImageResource(R.drawable.img_lectures);
+                break;
+        }
 
         // 设置报名按钮状态
         updateRegisterButtonState();
@@ -98,7 +116,7 @@ public class EventDetailActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
