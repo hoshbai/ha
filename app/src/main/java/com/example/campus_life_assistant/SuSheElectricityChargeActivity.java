@@ -1,5 +1,7 @@
 package com.example.campus_life_assistant;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -81,8 +83,9 @@ public class SuSheElectricityChargeActivity extends AppCompatActivity {
     }
 
     private void loadCurrentBalance() {
-        String buildingNo = "8";   // 示例宿舍楼号
-        String roomNo = "210";     // 示例宿舍号
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        String buildingNo = sharedPref.getString("buildingNo", null);
+        String roomNo = sharedPref.getString("roomNo", null);
 
         ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
         Call<Dormitory> call = apiService.getBalance(buildingNo, roomNo);

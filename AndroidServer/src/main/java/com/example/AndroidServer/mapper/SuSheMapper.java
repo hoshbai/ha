@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface SuSheMapper {
     @Update({
@@ -19,4 +21,14 @@ public interface SuSheMapper {
     int updateDormitoryByBuildingAndRoom(@Param("buildingNo") String buildingNo,
                                          @Param("roomNo") String roomNo,
                                          @Param("username") String username);
+
+    @Select("SELECT susheId AS id, building_no AS buildingNo, room_no AS roomNo, balance FROM dormitory")
+    List<Dormitory> findAll();
+
+    @Select("SELECT susheId AS id, building_no AS buildingNo, room_no AS roomNo, balance FROM dormitory WHERE susheId = #{id}")
+    Dormitory findById(@Param("id") Integer id);
+
+    @Select("SELECT susheId AS id, building_no AS buildingNo, room_no AS roomNo, balance FROM dormitory WHERE building_no = #{buildingNo} AND room_no = #{roomNo}")
+    Dormitory findByBuildingAndRoom(@Param("buildingNo") String buildingNo,
+                                    @Param("roomNo") String roomNo);
 }

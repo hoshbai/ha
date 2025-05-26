@@ -31,58 +31,58 @@ import java.util.Map;
 @RequestMapping("/api")
 public class SuSheController {
     @Autowired
+    private UserMapper userMapper;
+    @Autowired
     private SuSheMapper suSheMapper;
     // 模拟 dormitoryInfo 数据
     @GetMapping("/sushe/dormitoryInfo")
     public ResponseEntity<Dormitory> getDormitoryInfo(@RequestParam String username) {
-        System.out.println("收到请求: username=" + username);
-        Dormitory dormitory = new Dormitory();
-        dormitory.setId(1L);
-        dormitory.setBuildingNo("8");
-//        dormitory.setRoomNo("210");
-        dormitory.setBalance(new BigDecimal("123.45"));
+        try {
+            // 1. 查询用户是否存在
+            User user = userMapper.selectByNameOnly(username);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 用户不存在
+            }
 
-        return ResponseEntity.ok(dormitory);
+            Integer susheId = user.getSusheId();
+
+            // 2. 判断是否已绑定宿舍
+            if (susheId == null || susheId == 0) {
+                // 用户未绑定宿舍，返回空 Dormitory 对象
+                return ResponseEntity.ok(new Dormitory());
+            }
+
+            // 3. 查询宿舍详细信息
+            Dormitory dormitory = suSheMapper.findById(susheId);
+            if (dormitory == null) {
+                // 数据异常：用户绑定了宿舍，但宿舍表中查不到
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+
+            return ResponseEntity.ok(dormitory);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // 模拟 getAllDormitories 数据
     @GetMapping("/sushe/getAllDormitories")
     public ResponseEntity<List<Dormitory>> getAllDormitories() {
-        List<Dormitory> dormitoryList = new ArrayList<>();
-
-        Dormitory d1 = new Dormitory();
-        d1.setId(1L);
-        d1.setBuildingNo("8");
-        d1.setRoomNo("210");
-        d1.setBalance(new BigDecimal("123.45"));
-        dormitoryList.add(d1);
-
-        Dormitory d2 = new Dormitory();
-        d2.setId(2L);
-        d2.setBuildingNo("8");
-        d2.setRoomNo("211");
-        d2.setBalance(new BigDecimal("89.00"));
-        dormitoryList.add(d2);
-
-        Dormitory d3 = new Dormitory();
-        d3.setId(3L);
-        d3.setBuildingNo("9");
-        d3.setRoomNo("305");
-        d3.setBalance(new BigDecimal("76.50"));
-        dormitoryList.add(d3);
-
-        Dormitory d4 = new Dormitory();
-        d4.setId(4L);
-        d4.setBuildingNo("9");
-        d4.setRoomNo("306");
-        d4.setBalance(new BigDecimal("45.00"));
-        dormitoryList.add(d4);
-
-        return ResponseEntity.ok(dormitoryList);
+        try {
+            List<Dormitory> dormitoryList = suSheMapper.findAll();
+            return ResponseEntity.ok(dormitoryList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @GetMapping("/sushe/loadChargeHistory")
-    public ResponseEntity<List<ChargeHistory>> loadChargeHistory(@RequestParam("buildingNo") String buildingNo, @RequestParam("roomNo") String roomNo) {
+    public ResponseEntity<List<ChargeHistory>> loadChargeHistory(
+            @RequestParam("buildingNo") String buildingNo,
+            @RequestParam("roomNo") String roomNo) {
 
         try {
             // 打印调试信息
@@ -101,23 +101,27 @@ public class SuSheController {
         }
     }
 
+
     @GetMapping("/sushe/getBalance")
     public ResponseEntity<Dormitory> loadCurrentBalance(
             @RequestParam("buildingNo") String buildingNo,
             @RequestParam("roomNo") String roomNo) {
 
-        // 模拟数据开始
-        Dormitory dormitory = new Dormitory();
-        dormitory.setId(1L);
-        dormitory.setBuildingNo(buildingNo); // 使用传入的楼号
-        dormitory.setRoomNo(roomNo);         // 使用传入的房间号
-        dormitory.setBalance(new BigDecimal("123.45")); // 固定余额
+        try {
+            // 1. 查询数据库中的宿舍信息
+            Dormitory dormitory = suSheMapper.findByBuildingAndRoom(buildingNo, roomNo);
 
-        // 可以加个判断，只允许特定宿舍号测试
-        if ("8".equals(buildingNo) && "210".equals(roomNo)) {
-            return ResponseEntity.ok(dormitory);
-        } else {
-            return ResponseEntity.notFound().build();
+            if (dormitory != null) {
+                // 存在 → 返回宿舍信息
+                return ResponseEntity.ok(dormitory);
+            } else {
+                // 不存在 → 返回 404
+                return ResponseEntity.notFound().build();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     @PostMapping("/sushe/updateDormitory")
