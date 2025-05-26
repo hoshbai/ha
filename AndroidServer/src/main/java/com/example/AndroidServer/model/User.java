@@ -4,7 +4,16 @@ public class User {
     private Integer u_id;
     private String u_name;
     private String u_password;
+    private Integer susheId;
     private String create_time; // 如果数据库中还有时间字段，比如 create_time
+
+    public Integer getSusheId() {
+        return susheId;
+    }
+
+    public void setSusheId(Integer susheId) {
+        this.susheId = susheId;
+    }
 
     public Integer getU_id() {
         return u_id;
@@ -47,4 +56,6 @@ public class User {
                 ", create_time='" + create_time + '\'' +
                 '}';
     }
+
+
 }
