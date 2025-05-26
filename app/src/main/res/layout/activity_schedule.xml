@@ -1,114 +1,297 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="8dp">
+    android:padding="16dp"
+    android:background="#f5f5f5">
 
-    <!-- Spinner for Week Selection -->
-    <Spinner
-        android:id="@+id/spWeek"
+    <!-- 周次选择 -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
 
-    <!-- Scrollable Table Layout -->
-    <ScrollView
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择周次："
+            android:textSize="16sp"
+            android:textColor="#333333"/>
+
+        <Spinner
+            android:id="@+id/spWeek"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginLeft="8dp"
+            android:background="@drawable/spinner_background"/>
+    </LinearLayout>
+
+    <!-- 课程表 -->
+    <TableLayout
+        android:id="@+id/tlSchedule"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:stretchColumns="*"
+        android:background="#cccccc"/>
 
-        <HorizontalScrollView
+    <!-- 添加课程按钮 -->
+    <Button
+        android:id="@+id/btnAddCourse"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="添加课程"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#2196F3"
+        android:textColor="#ffffff"/>
+</LinearLayout>
+
+
+<!--
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        &lt;!&ndash; Spinner for Week Selection &ndash;&gt;
+        <Spinner
+            android:id="@+id/spWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        &lt;!&ndash; Scrollable Table Layout &ndash;&gt;
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TableLayout
+                    android:id="@+id/tlSchedule"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="*">
+
+                    &lt;!&ndash; Header Row (Days of the Week) &ndash;&gt;
+                    <TableRow
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/darker_gray">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="时间段"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周一"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周二"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周三"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周四"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周五"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周六"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周日"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+                    </TableRow>
+                </TableLayout>
+            </HorizontalScrollView>
+        </ScrollView>
+
+        &lt;!&ndash; Add Course Button &ndash;&gt;
+        <Button
+            android:id="@+id/btnAddCourse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="添加课程"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+-->
+
+<!--
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        &lt;!&ndash; Spinner for Week Selection &ndash;&gt;
+        <Spinner
+            android:id="@+id/spWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        &lt;!&ndash; Scrollable Table Layout &ndash;&gt;
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TableLayout
-                android:id="@+id/tlSchedule"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:stretchColumns="*">
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <!-- Header Row (Days of the Week) -->
-                <TableRow
-                    android:layout_width="match_parent"
+                <TableLayout
+                    android:id="@+id/tlSchedule"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@android:color/darker_gray">
+                    android:stretchColumns="*">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    &lt;!&ndash; Header Row (Days of the Week) &ndash;&gt;
+                    <TableRow
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="时间段"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        android:background="@android:color/darker_gray">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周一"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="时间段"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周二"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周一"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周三"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周二"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周四"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周三"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周五"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周四"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周六"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周五"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="周日"
-                        android:gravity="center"
-                        android:padding="8dp"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold" />
-                </TableRow>
-            </TableLayout>
-        </HorizontalScrollView>
-    </ScrollView>
-</LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周六"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="周日"
+                            android:gravity="center"
+                            android:padding="8dp"
+                            android:textColor="@android:color/white"
+                            android:textStyle="bold" />
+                    </TableRow>
+                </TableLayout>
+            </HorizontalScrollView>
+        </ScrollView>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>-->
