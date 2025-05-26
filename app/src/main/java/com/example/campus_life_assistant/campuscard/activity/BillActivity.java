@@ -4,48 +4,104 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.campus_life_assistant.R;
-import com.example.campus_life_assistant.campuscard.model.ConsumptionRecord;
+import com.example.campus_life_assistant.campuscard.model.CardTransaction;
 import com.example.campus_life_assistant.campuscard.ui.ConsumptionRecordAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+
+import com.example.campus_life_assistant.network.CampusCardApiService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class BillActivity extends AppCompatActivity {
 
     private RecyclerView rvConsumptionRecords;
-    private ConsumptionRecordAdapter consumptionRecordAdapter;
-    private List<ConsumptionRecord> consumptionRecordList = new ArrayList<>();
+    private ConsumptionRecordAdapter adapter;
+    private List<CardTransaction> transactionList = new ArrayList<>();
+
+    private CampusCardApiService campusCardApiService;
+    private static final String BASE_URL = "http://10.0.2.2:8081/api/";
+
+    private String cardId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill);
 
-        // 初始化视图
+        if (getIntent().getExtras() != null) {
+            cardId = getIntent().getExtras().getString("cardId");
+            if (cardId == null) {
+                Toast.makeText(this, "未获取到校园卡ID", Toast.LENGTH_SHORT).show();
+                finish();
+                return;
+            }
+        } else {
+            Toast.makeText(this, "未获取到校园卡信息", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         rvConsumptionRecords = findViewById(R.id.rv_consumption_records);
-
-        // 设置消费记录 RecyclerView
         rvConsumptionRecords.setLayoutManager(new LinearLayoutManager(this));
-        consumptionRecordAdapter = new ConsumptionRecordAdapter(consumptionRecordList);
-        rvConsumptionRecords.setAdapter(consumptionRecordAdapter);
 
-        // 加载静态账单数据
-        loadBillData();
+        adapter = new ConsumptionRecordAdapter(transactionList);
+        rvConsumptionRecords.setAdapter(adapter);
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        campusCardApiService = retrofit.create(CampusCardApiService.class);
+
+        loadTransactions(cardId);
     }
 
-    private void loadBillData() {
-        // 添加静态消费记录 (可以复用 CampusCardActivity 中的静态数据)
-        consumptionRecordList.add(new ConsumptionRecord("食堂午餐", "2025-05-23 12:30", -15.00));
-        consumptionRecordList.add(new ConsumptionRecord("超市购物", "2025-05-22 15:00", -20.50));
-        consumptionRecordList.add(new ConsumptionRecord("图书馆打印", "2025-05-21 09:00", -2.00));
-        consumptionRecordList.add(new ConsumptionRecord("充值", "2025-05-20 10:00", 50.00));
-        consumptionRecordList.add(new ConsumptionRecord("食堂晚餐", "2025-05-19 18:30", -18.00));
+    private void loadTransactions(String cardId) {
+        campusCardApiService.getTransactionsByCardId(cardId)
+                .enqueue(new Callback<List<CardTransaction>>() {
+                    @Override
+                    public void onResponse(Call<List<CardTransaction>> call, Response<List<CardTransaction>> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            transactionList.clear();
+                            transactionList.addAll(response.body());
+                            adapter.notifyDataSetChanged();
+                            if (transactionList.isEmpty()) {
+                                Toast.makeText(BillActivity.this, "暂无交易记录", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            String errorMessage = "获取交易记录失败";
+                            if (response.code() != 0) {
+                                errorMessage += ", 状态码: " + response.code();
+                            }
+                            if (response.errorBody() != null) {
+                                try {
+                                    errorMessage += ", 错误信息: " + response.errorBody().string();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            Toast.makeText(BillActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    }
 
-        // 通知适配器数据已改变
-        consumptionRecordAdapter.notifyDataSetChanged();
+                    @Override
+                    public void onFailure(Call<List<CardTransaction>> call, Throwable t) {
+                        Toast.makeText(BillActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 } 
