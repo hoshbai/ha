@@ -14,11 +14,16 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    // ✅ 正确拼接路径：BASE_URL的 /api/ + "library/books" → /api/library/books
+    // ✅ 修正前："api/library/search" → 修正后："library/search"
+    // 最终URL = BASE_URL + "library/search" → /api/library/search
+    @GET("library/search")
+    Call<List<Book>> searchBooks(@Query("keyword") String keyword);
+
+    // 保持原有
     @GET("library/books")
     Call<List<Book>> getAllBooks();
 
-    // ✅ 正确拼接路径：BASE_URL的 /api/ + "library/{bookId}" → /api/library/{bookId}
+    // 保持原有
     @GET("library/{bookId}")
     Call<Book> getBookDetails(@Path("bookId") int bookId);
 
@@ -30,6 +35,7 @@ public interface ApiService {
     @GET("library/notifications")
     Call<List<LibraryNotification>> getNotifications();
 
+    // ✅ 修正前："library/books/{id}/status" → 保持原本正确
     @POST("library/books/{id}/status")
     Call<Void> updateBookStatus(@Path("id") int id, @Query("status") String status);
 }

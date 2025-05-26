@@ -19,6 +19,15 @@ public interface LibraryMapper {
             "WHERE b.id = #{bookId} AND b.del_flg = 0")
     Book getBookDetailsById(@Param("bookId") int bookId);  // 移除了 static 关键字
 
+    @Select({
+            "SELECT b.id, b.book_name AS bookName, b.author, c.name AS categoryName, ",
+            "b.publishing_house AS publishingHouse, b.img_url AS imgUrl, b.price ",
+            "FROM book_info b ",
+            "JOIN category c ON b.category_id = c.id ",
+            "WHERE b.del_flg = 0 AND ",
+            "(b.book_name LIKE #{keyword} OR b.author LIKE #{keyword} OR c.name LIKE #{keyword})"
+    })
+    List<Book> searchBooks(@Param("keyword") String keyword);
     // 修复2：统一参数命名
     @Select("SELECT b.id, b.book_name AS bookName, b.author, b.publishing_house AS publishingHouse, " +
             "b.translator, b.publish_date AS publishDate, b.pages, b.ISBN, b.price, " +
