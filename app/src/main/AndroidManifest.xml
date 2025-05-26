@@ -130,6 +130,35 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
+
+        <!-- 新闻模块相关Activity -->
+        <activity
+            android:name=".news.activity.NewsListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".news.activity.NewsDetailActivity"
+            android:exported="false" />
+
+        <!-- 校园卡管理模块相关Activity -->
+        <activity
+            android:name=".campuscard.activity.CampusCardActivity"
+            android:exported="false" />
+
+
+        <!-- 校园卡管理子功能Activity -->
+        <activity
+            android:name=".campuscard.activity.BillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.CardRechargeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.InternetFeeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.LossUnlossActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
