@@ -2,10 +2,7 @@ package com.example.AndroidServer.controller;
 
 import com.example.AndroidServer.mapper.SuSheMapper;
 import com.example.AndroidServer.mapper.UserMapper;
-import com.example.AndroidServer.model.ChargeHistory;
-import com.example.AndroidServer.model.Dormitory;
-import com.example.AndroidServer.model.User;
-import com.example.AndroidServer.model.UserRequest;
+import com.example.AndroidServer.model.*;
 import com.example.AndroidServer.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,7 +28,42 @@ public class SuSheController {
     private UserMapper userMapper;
     @Autowired
     private SuSheMapper suSheMapper;
-    // 模拟 dormitoryInfo 数据
+    @PostMapping("/sushe/charge")
+    public ResponseEntity<ChargeResponse> handleCharge(@RequestBody ChargeRequest request) {
+        try {
+            // 1. 查询宿舍信息
+            Dormitory dormitory = suSheMapper.findByBuildingAndRoom(request.getBuildingNo(), request.getRoomNo());
+            if (dormitory == null) {
+                return ResponseEntity.badRequest().body(new ChargeResponse(false, "无效的宿舍信息", 0, null));
+            }
+
+            Long dormitoryId = dormitory.getId();
+
+            // 2. 构造充值历史记录
+            ChargeHistory history = new ChargeHistory();
+            history.setDormitoryId(dormitoryId);
+            history.setAmount(request.getAmount());
+            history.setName(request.getName());
+            history.setDate(new Date(System.currentTimeMillis()));
+
+            // 3. 写入数据库
+            suSheMapper.insertInToChargeHistory(history);
+
+            // 4. 更新宿舍余额
+            BigDecimal newBalance = dormitory.getBalance().add(BigDecimal.valueOf(request.getAmount()));
+            dormitory.setBalance(newBalance);
+            suSheMapper.updateBalance(dormitory);
+
+            // 5. 构造返回结果
+            ChargeResponse response = new ChargeResponse(true, "充值成功", newBalance.doubleValue(), history);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ChargeResponse(false, "服务器内部错误", 0, null));
+        }
+    }
     @GetMapping("/sushe/dormitoryInfo")
     public ResponseEntity<Dormitory> getDormitoryInfo(@RequestParam String username) {
         try {
@@ -85,15 +114,21 @@ public class SuSheController {
             @RequestParam("roomNo") String roomNo) {
 
         try {
-            // 打印调试信息
-            System.out.println("收到请求: 楼号=" + buildingNo + ", 房间号=" + roomNo);
+            // 1. 查询宿舍信息，得到 dormitory_id
+            Dormitory dormitory = suSheMapper.findByBuildingAndRoom(buildingNo, roomNo);
+            if (dormitory == null) {
+                return ResponseEntity.notFound().build(); // 宿舍不存在
+            }
 
-            // TODO: 这里替换为从数据库查询真实数据
-            List<ChargeHistory> mockData = new ArrayList<>();
-            mockData.add(new ChargeHistory(new Date(2025 - 1900, 5 - 1, 25), 20.0));
-            mockData.add(new ChargeHistory(new Date(2025 - 1900, 5 - 1, 26), 10.0));
+            Long dormitoryId = dormitory.getId();
+            if (dormitoryId == null) {
+                return ResponseEntity.badRequest().body(Collections.emptyList());
+            }
 
-            return ResponseEntity.ok(mockData);
+            // 2. 查询充电记录
+            List<ChargeHistory> histories = suSheMapper.findByDormitoryId(dormitoryId);
+
+            return ResponseEntity.ok(histories);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,23 +1,28 @@
 package com.example.AndroidServer.model;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class ChargeHistory {
-    private Date date;
+    private Long id;
+    private Long dormitoryId;
     private Double amount;
+    private String name;
+    private Date date;
 
-    public ChargeHistory(Date date, Double amount) {
-        this.date = date;
-        this.amount = amount;
+    public Long getId() {
+        return id;
     }
 
-    // Getter and Setter
-    public Date getDate() {
-        return date;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public Long getDormitoryId() {
+        return dormitoryId;
+    }
+
+    public void setDormitoryId(Long dormitoryId) {
+        this.dormitoryId = dormitoryId;
     }
 
     public Double getAmount() {
@@ -27,4 +32,21 @@ public class ChargeHistory {
     public void setAmount(Double amount) {
         this.amount = amount;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+// Getter and Setter
 }

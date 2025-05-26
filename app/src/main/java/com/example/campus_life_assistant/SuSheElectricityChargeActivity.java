@@ -1,6 +1,7 @@
 package com.example.campus_life_assistant;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
@@ -14,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.example.campus_life_assistant.model.ChargeHistory;
+import com.example.campus_life_assistant.model.ChargeRequest;
+import com.example.campus_life_assistant.model.ChargeResponse;
 import com.example.campus_life_assistant.model.Dormitory;
 import com.example.campus_life_assistant.network.ApiService;
 import com.example.campus_life_assistant.network.RetrofitClient;
@@ -60,15 +63,55 @@ public class SuSheElectricityChargeActivity extends AppCompatActivity {
                     return;
                 }
 
-                // 更新余额
-                balance += amount;
-                updateBalance(balance);
+                // 获取 buildingNo 和 roomNo（可以从 SharedPreferences 中读取）
+                SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+                String buildingNo = sharedPref.getString("buildingNo", null);
+                String roomNo = sharedPref.getString("roomNo", null);
 
-                // 清空输入框
-                etAmount.setText("");
+                if (buildingNo == null || roomNo == null) {
+                    Toast.makeText(this, "未绑定宿舍信息，请先选择宿舍", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this, SelectDormitoryActivity.class));
+                    finish();
+                    return;
+                }
 
-                // 显示成功提示
-                Toast.makeText(this, "充值成功！当前余额：¥" + balance, Toast.LENGTH_SHORT).show();
+                // 获取用户名作为充值人姓名（可从 SharedPreferences 中获取）
+                String username = sharedPref.getString("username", null);
+
+                // 构造请求体
+                ChargeRequest request = new ChargeRequest(buildingNo, roomNo, amount, username);
+
+                // 发起网络请求
+                ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
+                Call<ChargeResponse> call = apiService.chargeElectricity(request);
+
+                call.enqueue(new Callback<ChargeResponse>() {
+                    @Override
+                    public void onResponse(Call<ChargeResponse> call, Response<ChargeResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            // 获取服务器返回的余额和记录
+                            double serverBalance = response.body().getBalance();
+                            ChargeHistory latestHistory = response.body().getHistory();
+
+                            // 更新本地余额
+                            balance = serverBalance;
+                            updateBalance(balance);
+
+                            // 在页面上展示最新记录（可选）
+                            showLatestCharge(latestHistory);
+
+                            Toast.makeText(SuSheElectricityChargeActivity.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(SuSheElectricityChargeActivity.this, "充值失败：" + response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ChargeResponse> call, Throwable t) {
+                        Toast.makeText(SuSheElectricityChargeActivity.this, "网络请求失败：" + t.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
             } catch (NumberFormatException e) {
                 Toast.makeText(this, "请输入有效的金额", Toast.LENGTH_SHORT).show();
             }
@@ -76,7 +119,21 @@ public class SuSheElectricityChargeActivity extends AppCompatActivity {
         loadChargeHistory();
         loadCurrentBalance();
     }
+    private void showLatestCharge(ChargeHistory history) {
+        TextView tvItem = new TextView(this);
+        tvItem.setText(history.getDate() + " - ¥" + history.getAmount() + "（" + history.getName() + "）");
+        tvItem.setTextSize(14);
+        tvItem.setTextColor(getColor(android.R.color.black));
 
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 8, 0, 4); // 上下边距
+        tvItem.setLayoutParams(params);
+
+        historyContainer.addView(tvItem, 0); // 插入到开头
+    }
     // 更新余额显示
     private void updateBalance(double balance) {
         tvBalance.setText("当前余额：¥" + String.format("%.2f", balance));
@@ -111,9 +168,9 @@ public class SuSheElectricityChargeActivity extends AppCompatActivity {
 
     // 请求历史记录
     private void loadChargeHistory() {
-        // 宿舍信息示例
-        String buildingNo = "8";  // 宿舍栋号
-        String roomNo = "210";     // 宿舍编号
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        String buildingNo = sharedPref.getString("buildingNo", null);
+        String roomNo = sharedPref.getString("roomNo", null);
 
         // 获取 Retrofit 实例并创建接口
         ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);

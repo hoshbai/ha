@@ -4,6 +4,8 @@ package com.example.campus_life_assistant.network;
 import com.example.campus_life_assistant.model.BasicResponse;
 import com.example.campus_life_assistant.model.ChargeHistory;
 import com.example.campus_life_assistant.model.Book;
+import com.example.campus_life_assistant.model.ChargeRequest;
+import com.example.campus_life_assistant.model.ChargeResponse;
 import com.example.campus_life_assistant.model.Dormitory;
 import com.example.campus_life_assistant.model.LibraryNotification;
 
@@ -65,4 +67,7 @@ public interface ApiService {
 
     @POST("sushe/updateDormitory")
     Call<Boolean> updateDormitory(@Body Dormitory dormitory);
+
+    @POST("sushe/charge")
+    Call<ChargeResponse> chargeElectricity(@Body ChargeRequest request);
 }
