@@ -11,35 +11,39 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="网费充值"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:text="支付网费"
         android:gravity="center"
-        android:layout_marginBottom="32dp"/>
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"/>
 
-    <!-- 显示剩余网费 -->
     <TextView
-        android:id="@+id/tv_remaining_internet_fee"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"
-        tools:text="剩余网费: 50.00元"/>
-
-    <EditText
-        android:id="@+id/et_recharge_amount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="请输入充值金额"
-        android:inputType="numberDecimal"/>
-
-    <Button
-        android:id="@+id/btn_recharge"
+        android:id="@+id/tv_internet_fee_balance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="确定充值"/>
+        android:text="当前网费余额: --"
+        android:textAppearance="?attr/textAppearanceBodyMedium"/>
+
+    <TextView
+        android:id="@+id/tv_current_balance_internet_fee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="当前校园卡余额: --"
+        android:textAppearance="?attr/textAppearanceBodyMedium"/>
+
+    <EditText
+        android:id="@+id/et_internet_fee_amount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="请输入支付金额"
+        android:inputType="numberDecimal"/>
+
+    <Button
+        android:id="@+id/btn_pay_internet_fee"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="确认支付"/>
 
 </LinearLayout> 

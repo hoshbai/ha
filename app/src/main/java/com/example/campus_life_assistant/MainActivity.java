@@ -25,6 +25,7 @@ import androidx.fragment.app.FragmentTransaction; // Import FragmentTransaction
 import com.example.campus_life_assistant.Dao.DatabaseHelper;
 import com.example.campus_life_assistant.fragment.HomeFragment;
 import com.example.campus_life_assistant.fragment.ProfileFragment;
+import com.example.campus_life_assistant.fragment.SchoolFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -108,6 +109,8 @@ public class MainActivity extends AppCompatActivity {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
+            } else if (itemId == R.id.nav_school) {
+                selectedFragment = new SchoolFragment();
             }
             // Add other navigation cases here...
 

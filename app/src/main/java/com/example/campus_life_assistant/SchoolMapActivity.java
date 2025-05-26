@@ -68,8 +68,8 @@ public class SchoolMapActivity extends AppCompatActivity implements AMapLocation
     // 高德地图相关
     private MapView mapView;
     private AMap aMap;
-    private AMapLocationClient mLocationClient;
     private AMapLocationClientOption mLocationOption;
+    private AMapLocationClient mLocationClient;
     private OnLocationChangedListener mListener;
 
     // 路径规划相关

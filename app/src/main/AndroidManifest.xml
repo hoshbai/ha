@@ -44,6 +44,10 @@
 
         <!-- 校园活动相关Activity -->
         <activity
+            android:name=".activity.SearchActivity"
+            android:exported="false"
+            android:parentActivityName=".LibraryActivity" />
+        <activity
             android:name=".activity.BookDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -124,12 +128,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SelectDormitoryActivity" />
         <activity
             android:name=".SuSheMainActivity"
             android:exported="false" />
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
+
 
         <!-- 新闻模块相关Activity -->
         <activity

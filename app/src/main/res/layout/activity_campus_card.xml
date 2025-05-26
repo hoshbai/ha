@@ -17,6 +17,15 @@
         android:gravity="center"
         android:layout_marginBottom="32dp"/>
 
+    <TextView
+        android:id="@+id/tv_balance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="余额: --"
+        android:textSize="20sp"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"/>
+
     <GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
