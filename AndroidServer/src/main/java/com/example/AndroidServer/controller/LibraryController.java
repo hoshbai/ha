@@ -1,8 +1,11 @@
 package com.example.AndroidServer.controller;
 
 import com.example.AndroidServer.mapper.LibraryMapper;
+import com.example.AndroidServer.mapper.UserMapper;
 import com.example.AndroidServer.model.Book;
 import com.example.AndroidServer.model.LibraryNotification;
+import com.example.AndroidServer.model.User;
+import com.example.AndroidServer.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,68 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/library")
 public class LibraryController {
+    @Autowired
+    private JwtUtil jwtUtil; // JWT工具类
+
+    @Autowired
+    private UserMapper userMapper; // 用户Mapper
+
+    @Autowired
+    private LibraryMapper libraryMapper;
+
+    // 收藏相关接口
+    @GetMapping("/favorites")
+    public ResponseEntity<List<Book>> getFavorites(@RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        User user = userMapper.selectByNameOnly(username);
+        if(user == null) return ResponseEntity.status(401).build();
+
+        List<Book> books = mapper.getFavoritesByUserId(user.getU_id());
+        return ResponseEntity.ok(books);
+    }
+
+    @PostMapping("/books/{bookId}/favorite")
+    public ResponseEntity<?> toggleFavorite(
+            @PathVariable int bookId,
+            @RequestParam String action,
+            @RequestHeader("Authorization") String token) { // 确保使用正确的大小写
+        // 原认证逻辑保持不变
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        User user = userMapper.selectByNameOnly(username);
+        if(user == null) return ResponseEntity.status(401).build();
+        // 操作收藏
+        if("add".equals(action)){
+            mapper.addFavorite(user.getU_id(), bookId);
+        }else{
+            mapper.removeFavorite(user.getU_id(), bookId);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    // 阅读历史相关接口
+    @GetMapping("/history")
+    public ResponseEntity<List<Book>> getHistory(@RequestHeader("Authorization") String token) {
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        User user = userMapper.selectByNameOnly(username);
+        if(user == null) return ResponseEntity.status(401).build();
+
+        List<Book> books = mapper.getHistoryByUserId(user.getU_id());
+        return ResponseEntity.ok(books);
+    }
+
+    @PostMapping("/books/{bookId}/record-view")
+    public ResponseEntity<?> recordView(
+            @PathVariable int bookId,
+            @RequestHeader("Authorization") String token) {
+
+        String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+        User user = userMapper.selectByNameOnly(username);
+        if(user == null) return ResponseEntity.status(401).build();
+
+        mapper.insertHistory(user.getU_id(), bookId);
+        return ResponseEntity.ok().build();
+    }
+
     @Autowired
     private LibraryMapper mapper; // 确保实例注入正确
 

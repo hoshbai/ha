@@ -1,4 +1,3 @@
-// ApiService.java
 package com.example.campus_life_assistant.network;
 
 import com.example.campus_life_assistant.model.BasicResponse;
@@ -14,11 +13,29 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiService {
+    @GET("library/history")
+    Call<List<Book>> getHistory(@Header("Authorization") String token);
+
+    @GET("library/favorites")
+    Call<List<Book>> getFavorites(@Header("Authorization") String token);
+
+    @POST("library/books/{bookId}/favorite")
+    Call<Void> toggleFavorite(
+            @Path("bookId") int bookId,
+            @Query("action") String action,
+            @Header("Authorization") String authorization // 强制携带认证头
+    );
+    @POST("library/books/{bookId}/record-view")
+    Call<Void> recordView(
+            @Path("bookId") int bookId,
+            @Header("Authorization") String authorization // 历史记录接口同样需要
+    );
 
     // ✅ 修正前："api/library/search" → 修正后："library/search"
     // 最终URL = BASE_URL + "library/search" → /api/library/search
@@ -45,7 +62,7 @@ public interface ApiService {
     @POST("library/books/{id}/status")
     Call<Void> updateBookStatus(@Path("id") int id, @Query("status") String status);
 
-//宿舍部分
+    //宿舍部分
     @GET("sushe/loadChargeHistory")
     Call<List<ChargeHistory>> getChargeHistory(
             @Query("buildingNo") String buildingNo,
