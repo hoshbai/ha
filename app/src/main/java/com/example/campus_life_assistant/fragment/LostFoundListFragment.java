@@ -33,6 +33,8 @@ import java.util.Locale;
 public class LostFoundListFragment extends Fragment implements LostFoundAdapter.OnItemClickListener {
 
     private static final String ARG_ITEM_TYPE = "item_type";
+    private static List<LostFoundItem> allItems = new ArrayList<>(); // 存储所有物品的静态列表
+    private static int nextId = 5; // 下一个可用的ID，从5开始（因为示例数据用了1-4）
     
     private Integer itemType;
     private RecyclerView recyclerView;
@@ -60,6 +62,11 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
         if (getArguments() != null && getArguments().containsKey(ARG_ITEM_TYPE)) {
             itemType = getArguments().getInt(ARG_ITEM_TYPE);
         }
+        
+        // 如果静态列表为空，初始化示例数据
+        if (allItems.isEmpty()) {
+            allItems.addAll(generateMockItems());
+        }
     }
 
     @Nullable
@@ -80,7 +87,7 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
         addFab.setOnClickListener(v -> {
             // 跳转到添加失物招领信息的页面
             Intent intent = new Intent(getActivity(), AddLostFoundActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, 1); // 使用startActivityForResult而不是startActivity
         });
         
         // 初始化适配器
@@ -91,6 +98,15 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
         loadData();
         
         return view;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            // 无论结果如何，都刷新数据
+            refreshData();
+        }
     }
     
     @Override
@@ -108,13 +124,18 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
         
         // 模拟网络请求延迟
         new Handler().postDelayed(() -> {
-            // 生成模拟数据
-            List<LostFoundItem> items = generateMockItems();
+            // 根据类型筛选数据
+            List<LostFoundItem> filteredItems = new ArrayList<>();
+            for (LostFoundItem item : allItems) {
+                if (itemType == null || item.getItemType() == itemType) {
+                    filteredItems.add(item);
+                }
+            }
             
             // 更新UI
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    updateUI(items);
+                    updateUI(filteredItems);
                     if (getActivity() instanceof LostFoundActivity) {
                         ((LostFoundActivity) getActivity()).hideLoading();
                     }
@@ -123,7 +144,7 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
                     }
                 });
             }
-        }, 1000); // 延迟1秒模拟网络请求
+        }, 500); // 延迟0.5秒模拟网络请求
     }
     
     // 刷新数据
@@ -146,11 +167,16 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
             emptyView.setVisibility(View.GONE);
         }
     }
+
+    // 添加新物品
+    public static void addItem(LostFoundItem item) {
+        item.setId(nextId++);
+        allItems.add(0, item); // 添加到列表开头
+    }
     
     // 生成模拟数据
     private List<LostFoundItem> generateMockItems() {
         List<LostFoundItem> mockItems = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
         
         // 寻物启事模拟数据
@@ -213,7 +239,7 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
                     "2024001003"
             ));
             
-            // 耳机
+            // AirPods耳机
             calendar.setTime(new Date());
             calendar.add(Calendar.HOUR, -3);
             Date time4 = calendar.getTime();
@@ -234,6 +260,16 @@ public class LostFoundListFragment extends Fragment implements LostFoundAdapter.
         }
         
         return mockItems;
+    }
+
+    // 根据ID获取物品
+    public static LostFoundItem getItemById(int id) {
+        for (LostFoundItem item : allItems) {
+            if (item.getId() == id) {
+                return item;
+            }
+        }
+        return null;
     }
 
     @Override

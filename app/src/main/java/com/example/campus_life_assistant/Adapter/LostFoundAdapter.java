@@ -15,13 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.entry.LostFoundItem;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.LostFoundViewHolder> {
 
     private List<LostFoundItem> itemList;
     private Context context;
     private OnItemClickListener listener;
+    private SimpleDateFormat dateFormat;
 
     public interface OnItemClickListener {
         void onItemClick(LostFoundItem item);
@@ -33,6 +36,7 @@ public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.Lost
         this.context = context;
         this.itemList = itemList;
         this.listener = listener;
+        this.dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
     }
 
     @NonNull
@@ -46,6 +50,9 @@ public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.Lost
     public void onBindViewHolder(@NonNull LostFoundViewHolder holder, int position) {
         LostFoundItem item = itemList.get(position);
         
+        // 设置图片
+        holder.itemImageView.setImageResource(item.getItemImageResourceId());
+        
         // 设置标签颜色和文本
         int tagColorResId = item.getItemType() == LostFoundItem.TYPE_LOST ? 
                 R.color.color_lost : R.color.color_found;
@@ -57,7 +64,7 @@ public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.Lost
         holder.categoryTextView.setText(item.getCategory());
         
         // 格式化日期时间
-        String dateTimeStr = DateFormat.format("yyyy-MM-dd HH:mm", item.getTime()).toString();
+        String dateTimeStr = dateFormat.format(item.getTime());
         holder.timeTextView.setText(dateTimeStr);
         
         holder.locationTextView.setText(item.getLocation());
@@ -69,7 +76,7 @@ public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.Lost
         
         // 设置发布者和发布时间
         String publishInfo = "发布者: " + item.getPublisherName();
-        String publishTimeStr = DateFormat.format("MM-dd HH:mm", item.getPublishTime()).toString();
+        String publishTimeStr = dateFormat.format(item.getPublishTime());
         publishInfo += " | 发布时间: " + publishTimeStr;
         holder.publishInfoTextView.setText(publishInfo);
         
@@ -97,13 +104,10 @@ public class LostFoundAdapter extends RecyclerView.Adapter<LostFoundAdapter.Lost
         });
         
         holder.completeButton.setOnClickListener(v -> {
-            if (listener != null && !item.isCompleted()) {
-                listener.onCompleteClick(item, holder.getAdapterPosition());
+            if (listener != null) {
+                listener.onCompleteClick(item, position);
             }
         });
-        
-        // 设置图片（此处使用默认图片，实际应用中可使用图片加载库如Glide）
-        holder.itemImageView.setImageResource(R.drawable.ic_launcher_foreground);
     }
 
     @Override

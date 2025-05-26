@@ -1,5 +1,7 @@
 package com.example.campus_life_assistant.entry;
 
+import com.example.campus_life_assistant.R;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -45,6 +47,25 @@ public class LostFoundItem implements Serializable {
         this.publisherId = publisherId;
         this.publishTime = new Date();
         this.isCompleted = false;
+    }
+
+    // 根据物品类别返回对应的图片资源ID
+    public int getItemImageResourceId() {
+        if (category == null) return R.drawable.img_lost_found_default;
+        
+        switch (category.toLowerCase()) {
+            case "证件":
+                return R.drawable.img_student_card;
+            case "电子":
+                if (description != null && description.toLowerCase().contains("airpods")) {
+                    return R.drawable.img_airpods;
+                }
+                return R.drawable.img_laptop;
+            case "钱包":
+                return R.drawable.img_wallet;
+            default:
+                return R.drawable.img_lost_found_default;
+        }
     }
 
     // Getters and Setters

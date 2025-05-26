@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.campus_life_assistant.entry.LostFoundItem;
+import com.example.campus_life_assistant.fragment.LostFoundListFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -42,6 +43,11 @@ public class AddLostFoundActivity extends AppCompatActivity {
     private Calendar calendar = Calendar.getInstance();
     private Date selectedDateTime = calendar.getTime();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+    // 物品类别选项
+    private String[] categories = {"证件", "电子", "钱包", "其他"};
+    // 联系方式类型选项
+    private String[] contactTypes = {"电话", "微信", "QQ"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +82,16 @@ public class AddLostFoundActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // 物品类别
-        String[] categories = {"证件", "电子", "书本", "钱包", "钥匙", "衣物", "饰品", "其他"};
+        // 设置物品类别选择器
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_dropdown_item, categories);
+                this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         categorySpinner.setAdapter(categoryAdapter);
 
-        // 联系方式类型
-        String[] contactTypes = {"电话", "微信", "QQ", "邮箱"};
+        // 设置联系方式类型选择器
         ArrayAdapter<String> contactTypeAdapter = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_dropdown_item, contactTypes);
+                this, android.R.layout.simple_spinner_item, contactTypes);
+        contactTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         contactTypeSpinner.setAdapter(contactTypeAdapter);
     }
 
@@ -103,32 +109,20 @@ public class AddLostFoundActivity extends AppCompatActivity {
 
     private void showDateTimePicker() {
         // 显示日期选择器
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) -> {
-                    calendar.set(Calendar.YEAR, year);
-                    calendar.set(Calendar.MONTH, month);
-                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-                    // 显示时间选择器
-                    new TimePickerDialog(
-                            this,
-                            (view1, hourOfDay, minute) -> {
-                                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                calendar.set(Calendar.MINUTE, minute);
-                                selectedDateTime = calendar.getTime();
-                                updateDateTimeText();
-                            },
-                            calendar.get(Calendar.HOUR_OF_DAY),
-                            calendar.get(Calendar.MINUTE),
-                            true
-                    ).show();
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-        datePickerDialog.show();
+            // 显示时间选择器
+            new TimePickerDialog(this, (view1, hourOfDay, minute) -> {
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                calendar.set(Calendar.MINUTE, minute);
+                selectedDateTime = calendar.getTime();
+                updateDateTimeText();
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
+
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void updateDateTimeText() {
@@ -138,25 +132,25 @@ public class AddLostFoundActivity extends AppCompatActivity {
     private boolean validateInput() {
         // 验证标题
         if (titleEditText.getText().toString().trim().isEmpty()) {
-            titleEditText.setError("请输入标题");
+            Toast.makeText(this, "请输入标题", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         // 验证描述
         if (descriptionEditText.getText().toString().trim().isEmpty()) {
-            descriptionEditText.setError("请输入描述");
+            Toast.makeText(this, "请输入描述", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         // 验证地点
         if (locationEditText.getText().toString().trim().isEmpty()) {
-            locationEditText.setError("请输入地点");
+            Toast.makeText(this, "请输入地点", Toast.LENGTH_SHORT).show();
             return false;
         }
 
         // 验证联系方式
         if (contactEditText.getText().toString().trim().isEmpty()) {
-            contactEditText.setError("请输入联系方式");
+            Toast.makeText(this, "请输入联系方式", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -181,7 +175,7 @@ public class AddLostFoundActivity extends AppCompatActivity {
 
         // 创建物品对象
         LostFoundItem item = new LostFoundItem(
-                0, // 临时ID，实际应用中应该由数据库生成
+                0, // 临时ID，实际应该由数据库生成
                 title,
                 description,
                 location,
@@ -195,10 +189,14 @@ public class AddLostFoundActivity extends AppCompatActivity {
                 publisherId
         );
 
-        // 模拟保存成功
+        // 保存物品到列表中
+        LostFoundListFragment.addItem(item);
+
+        // 显示成功提示
         Toast.makeText(this, "信息发布成功", Toast.LENGTH_SHORT).show();
         
-        // 关闭页面
+        // 设置结果并关闭页面
+        setResult(RESULT_OK);
         finish();
     }
 

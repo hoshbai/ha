@@ -397,7 +397,7 @@
                             <ImageView
                                 android:layout_width="48dp"
                                 android:layout_height="48dp"
-                                android:src="@drawable/ic_launcher_foreground" />
+                                android:src="@drawable/ic_lost_found" />
 
                             <TextView
                                 android:layout_width="wrap_content"
