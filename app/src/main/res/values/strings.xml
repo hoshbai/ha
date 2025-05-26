@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">智慧校园</string>
+    <string name="prompt_building">选择楼号</string>
+    <string name="prompt_room">选择房号</string>
 </resources>
