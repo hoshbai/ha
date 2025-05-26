@@ -76,4 +76,20 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
+    // Room Components
+    implementation "androidx.room:room-runtime:2.6.1"
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
+    // To use Kotlin annotation processing tool (kapt) - use kapt instead of annotationProcessor
+    // kapt "androidx.room:room-compiler:2.6.1"
+    // To use Kotlin Symbol Processing (KSP) - use ksp instead of annotationProcessor
+    // ksp "androidx.room:room-compiler:2.6.1"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    // implementation "androidx.room:room-ktx:2.6.1"
+    // optional - Guava support for Room,
+    // implementation "androidx.room:room-guava:2.6.1"
+    // Test helpers
+    // testImplementation "androidx.room:room-testing:2.6.1"
+    // optional - Paging 3 Integration
+    // implementation "androidx.room:room-paging:2.6.1"
+
 }
