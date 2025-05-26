@@ -1,4 +1,7 @@
 package com.example.campus_life_assistant;
+
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.icu.text.SimpleDateFormat;
 import android.view.View;
 import android.widget.TextView;
@@ -25,9 +28,10 @@ public class SuSheMainActivity extends AppCompatActivity {
         // 设置当前日期
         String currentDate = new SimpleDateFormat("yyyy年MM月dd日", Locale.CHINA).format(new Date());
         tvDate.setText(currentDate);
-
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
+        String username = sharedPref.getString("username", null);
         // 设置默认欢迎语（后期可替换为真实数据）
-        tvWelcome.setText("欢迎回来，\n李四");
+        tvWelcome.setText("欢迎回来，\n" + username);
 
         // 设置示例公告（后期可替换为网络数据）
         tvNotice.setText("4月15日 14:00-16:00 宿舍楼将停电检修");
@@ -50,7 +54,6 @@ public class SuSheMainActivity extends AppCompatActivity {
             startActivity(new Intent(this, SuSheAnnouncementActivity.class));
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
-
 
 
     }
