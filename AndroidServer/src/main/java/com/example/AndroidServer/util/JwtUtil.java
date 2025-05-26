@@ -1,50 +1,59 @@
 package com.example.AndroidServer.util;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import javax.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    // 使用安全的方式生成一个符合要求的密钥（推荐）
-    private final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private final long EXPIRATION = 864_000_00; // 24小时
+    // 使用安全的固定密钥配置方式
+    @Value("${jwt.secret}") // 从配置文件注入密钥
+    private String secretBase64; // 使用 base64 编码的密钥
 
-    // 或者使用自定义字符串密钥（必须是 Base64 编码格式）
-    // private final String SECRET_STRING = "your-secret-key-base64-encoded"; // 必须是 Base64 格式
-    // private final Key SECRET_KEY = Decoders.BASE64.decode(SECRET_STRING);
+    private Key SECRET_KEY; // 最终使用的密钥对象
+    private final long EXPIRATION = 86400000; // 24小时
+
+    // 初始化密钥配置
+    @PostConstruct
+    public void init() {
+        SECRET_KEY = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretBase64));
+    }
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(SECRET_KEY) // 使用 Key 对象而非原始字符串
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
     public String extractUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        return parseToken(token).getSubject();
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(SECRET_KEY)
-                    .build()
-                    .parseClaimsJws(token);
+            parseToken(token);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private Claims parseToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

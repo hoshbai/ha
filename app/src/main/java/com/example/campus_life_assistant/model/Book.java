@@ -37,6 +37,9 @@ public class Book implements Parcelable { // 实现Parcelable
 
     @SerializedName("price")
     private double price;
+    // 新增收藏状态字段 (确保和服务端同步命名)
+    @SerializedName("isFavorite")
+    private boolean isFavorite;
 
     @SerializedName("briefIntroduction")
     private String briefIntroduction;
@@ -176,5 +179,17 @@ public class Book implements Parcelable { // 实现Parcelable
 
     public int getDelFlg() {
         return delFlg;
+    }
+
+    // 修复方法实现
+    public boolean isFavorite() {
+        return this.isFavorite;
+    }
+    public void setFavorite(boolean favorite) {
+        this.isFavorite = favorite;
+    }
+    public Book updateFavoriteStatus() {
+        this.isFavorite = !this.isFavorite;
+        return this;
     }
 }
