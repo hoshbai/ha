@@ -8,14 +8,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    // ⚠️ 假设服务端所有接口均以 /api/ 开头 ⚠️
+    // ✅ 保持 /api/ 作为基础路径
     public static final String BASE_URL = "http://10.0.2.2:8081/api/";
 
     private static Retrofit retrofit;
 
     public static Retrofit getRetrofitInstance() {
         if (retrofit == null) {
-            // 启用详细网络请求日志（DEBUG模式）
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 

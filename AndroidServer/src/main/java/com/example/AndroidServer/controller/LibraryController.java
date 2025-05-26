@@ -18,6 +18,11 @@ public class LibraryController {
     @Autowired
     private LibraryMapper mapper; // 确保实例注入正确
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Book>> searchBooks(@RequestParam String keyword) {
+        List<Book> books = mapper.searchBooks("%" + keyword + "%");
+        return ResponseEntity.ok(books);
+    }
     // 根据图书 ID 查询详情
     @GetMapping("/{bookId}")
     public ResponseEntity<?> getBookDetails(@PathVariable int bookId) {
