@@ -31,6 +31,17 @@ android {
 }
 
 dependencies {
+    // 必需项：OkHttp核心库
+    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+
+    // 日志拦截器（解决找不到HttpLoggingInterceptor的问题）
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    // Retrofit & Gson
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
     implementation 'com.google.firebase:firebase-auth:21.4.0'
     implementation 'pub.devrel:easypermissions:3.0.0'
     // Security library for EncryptedSharedPreferences
@@ -47,10 +58,10 @@ dependencies {
     implementation 'mysql:mysql-connector-java:5.1.49'
     implementation libs.recyclerview
     implementation files('src/main/libs/AMap3DMap_10.1.201_AMapNavi_10.1.201_AMapSearch_9.7.4_AMapLocation_6.4.9_20250326.jar')
-    
+
     // 添加SwipeRefreshLayout依赖
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
@@ -65,8 +76,20 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
-    //此处修改了代码
-    implementation 'com.github.bumptech.glide:glide:4.15.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.15.1'
-}
+    // Room Components
+    implementation "androidx.room:room-runtime:2.6.1"
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
+    // To use Kotlin annotation processing tool (kapt) - use kapt instead of annotationProcessor
+    // kapt "androidx.room:room-compiler:2.6.1"
+    // To use Kotlin Symbol Processing (KSP) - use ksp instead of annotationProcessor
+    // ksp "androidx.room:room-compiler:2.6.1"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    // implementation "androidx.room:room-ktx:2.6.1"
+    // optional - Guava support for Room,
+    // implementation "androidx.room:room-guava:2.6.1"
+    // Test helpers
+    // testImplementation "androidx.room:room-testing:2.6.1"
+    // optional - Paging 3 Integration
+    // implementation "androidx.room:room-paging:2.6.1"
 
+}

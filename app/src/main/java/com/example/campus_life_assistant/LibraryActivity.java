@@ -2,167 +2,110 @@ package com.example.campus_life_assistant;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.example.campus_life_assistant.Adapter.BookAdapter;
-import com.example.campus_life_assistant.Adapter.LibraryNotificationAdapter;
 import com.example.campus_life_assistant.Adapter.LibraryTabPagerAdapter;
 import com.example.campus_life_assistant.model.Book;
-import com.example.campus_life_assistant.model.LibraryNotification;
+import com.example.campus_life_assistant.network.ApiService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LibraryActivity extends AppCompatActivity {
 
+    private static final String BASE_URL = "http://10.0.2.2:8081/api/";
+    private final String[] titles = {
+            "全部",
+            "小说·文学",
+            "科技·IT·互联网",
+            "历史·传记",
+            "哲学",
+            "艺术·设计·摄影",
+            "经济·金融",
+            "科学·自然",
+            "计算机",
+            "医学·健康·养生"
+    };
+
     private ViewPager2 viewPager;
     private TabLayout tabLayout;
-    private RecyclerView recommendationsRecyclerView;
-    private RecyclerView notificationsRecyclerView;
+    private RecyclerView dailyRecView;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_library);
 
-        // Setup toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("图书馆");
 
-        // Initialize ViewPager and TabLayout
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
+        dailyRecView = findViewById(R.id.dailyRecommendationsRecyclerView);
 
-        // Setup tabs and ViewPager
-        setupTabsAndViewPager();
-
-        // Setup daily recommendations
-        recommendationsRecyclerView = findViewById(R.id.dailyRecommendationsRecyclerView);
-        setupDailyRecommendations();
-
-        // Setup notifications
-        notificationsRecyclerView = findViewById(R.id.notificationsRecyclerView);
-        setupNotifications();
-
-        // Setup quick actions
-        setupQuickActions();
+        setupTabs();
+        fetchRecommendedBooks();
     }
 
-    private void setupTabsAndViewPager() {
+    private void setupTabs() {
         LibraryTabPagerAdapter adapter = new LibraryTabPagerAdapter(this);
         viewPager.setAdapter(adapter);
-
-        // Connect TabLayout and ViewPager2
         new TabLayoutMediator(tabLayout, viewPager,
-                (tab, position) -> {
-                    switch (position) {
-                        case 0:
-                            tab.setText("全部图书");
-                            break;
-                        case 1:
-                            tab.setText("文学");
-                            break;
-                        case 2:
-                            tab.setText("科技");
-                            break;
-                        case 3:
-                            tab.setText("历史");
-                            break;
-                        case 4:
-                            tab.setText("哲学");
-                            break;
-                        case 5:
-                            tab.setText("艺术");
-                            break;
-                        case 6:
-                            tab.setText("经济");
-                            break;
-                        case 7:
-                            tab.setText("自然科学");
-                            break;
-                        case 8:
-                            tab.setText("计算机");
-                            break;
-                        case 9:
-                            tab.setText("医学");
-                            break;
-                    }
-                }
+                (tab, pos) -> tab.setText(titles[pos])
         ).attach();
     }
 
-    private void setupDailyRecommendations() {
-        // Create sample book data
-        List<Book> recommendedBooks = Arrays.asList(
-                new Book("深入理解计算机系统", "Randal E. Bryant", "计算机", "https://placeholder.com/book1.jpg", 4.9f),
-                new Book("活着", "余华", "文学", "https://placeholder.com/book2.jpg", 4.8f),
-                new Book("人类简史", "尤瓦尔·赫拉利", "历史", "https://placeholder.com/book3.jpg", 4.7f),
-                new Book("三体", "刘慈欣", "科幻", "https://placeholder.com/book4.jpg", 4.9f),
-                new Book("算法导论", "Thomas H. Cormen", "计算机", "https://placeholder.com/book5.jpg", 4.6f)
-        );
+    private void fetchRecommendedBooks() {
+        // Just show a selection of recommended books in the top horizontal list
+        Call<List<Book>> call = apiService.getAllBooks();
 
-        BookAdapter adapter = new BookAdapter(this, recommendedBooks);
-        recommendationsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        recommendationsRecyclerView.setAdapter(adapter);
-    }
-
-    private void setupNotifications() {
-        // Create sample notification data
-        List<LibraryNotification> notifications = new ArrayList<>();
-        notifications.add(new LibraryNotification(
-                LibraryNotification.TYPE_DUE_SOON,
-                "《设计模式》将于3天后到期",
-                "请及时续借或归还图书，以免产生罚款",
-                System.currentTimeMillis()));
-        notifications.add(new LibraryNotification(
-                LibraryNotification.TYPE_OVERDUE,
-                "《Java编程思想》已逾期2天",
-                "当前罚款: ¥2.00，请尽快归还",
-                System.currentTimeMillis() - 86400000));
-        notifications.add(new LibraryNotification(
-                LibraryNotification.TYPE_ANNOUNCEMENT,
-                "图书馆开放时间调整通知",
-                "5月1日至5月3日期间，图书馆开放时间调整为9:00-17:00",
-                System.currentTimeMillis() - 172800000));
-
-        LibraryNotificationAdapter adapter = new LibraryNotificationAdapter(this, notifications);
-        notificationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        notificationsRecyclerView.setAdapter(adapter);
-    }
-
-    private void setupQuickActions() {
-        // Setup click listeners for quick action buttons
-        findViewById(R.id.btnBorrowedBooks).setOnClickListener(v -> {
-            Toast.makeText(this, "查看已借阅图书", Toast.LENGTH_SHORT).show();
-            // TODO: 跳转到已借阅图书页面
-        });
-
-        findViewById(R.id.btnWishlist).setOnClickListener(v -> {
-            Toast.makeText(this, "查看我的书单", Toast.LENGTH_SHORT).show();
-            // TODO: 跳转到我的书单页面
-        });
-
-        findViewById(R.id.btnReservations).setOnClickListener(v -> {
-            Toast.makeText(this, "查看预约记录", Toast.LENGTH_SHORT).show();
-            // TODO: 跳转到预约记录页面
-        });
-
-        findViewById(R.id.btnReadingHistory).setOnClickListener(v -> {
-            Toast.makeText(this, "查看阅读历史", Toast.LENGTH_SHORT).show();
-            // TODO: 跳转到阅读历史页面
+        call.enqueue(new Callback<List<Book>>() {
+            @Override
+            public void onResponse(Call<List<Book>> call, Response<List<Book>> resp) {
+                if (resp.isSuccessful() && resp.body() != null) {
+                    List<Book> list = resp.body();
+                    if (list.isEmpty()) {
+                        Toast.makeText(LibraryActivity.this,
+                                "返回图书列表为空", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(LibraryActivity.this,
+                                "成功加载 " + list.size() + " 本图书", Toast.LENGTH_SHORT).show();
+                        BookAdapter adapter = new BookAdapter(LibraryActivity.this, list);
+                        dailyRecView.setLayoutManager(
+                                new LinearLayoutManager(LibraryActivity.this,
+                                        LinearLayoutManager.HORIZONTAL, false));
+                        dailyRecView.setAdapter(adapter);
+                    }
+                } else {
+                    Toast.makeText(LibraryActivity.this,
+                            "加载图书失败: " + resp.code() + " - " + resp.message(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override public void onFailure(Call<List<Book>> call, Throwable t) {
+                Toast.makeText(LibraryActivity.this,
+                        "网络错误：" + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
         });
     }
 

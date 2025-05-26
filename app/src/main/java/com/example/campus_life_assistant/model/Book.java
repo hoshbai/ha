@@ -1,88 +1,180 @@
+// app/src/main/java/com/example/campus_life_assistant/model/Book.java
 package com.example.campus_life_assistant.model;
 
-public class Book {
-    private String title;
+import android.os.Parcel;
+import android.os.Parcelable;
+import com.google.gson.annotations.SerializedName;
+
+public class Book implements Parcelable { // 实现Parcelable
+
+    // 原有字段 -------------------------------------------------
+    @SerializedName("categoryName")
+    private String categoryName;
+
+    @SerializedName("id")
+    private int id;
+
+    @SerializedName("bookName")
+    private String bookName;
+
+    @SerializedName("author")
     private String author;
-    private String category;
-    private String imageUrl;
-    private float rating;
-    private boolean isBorrowed;
-    private boolean isWishlisted;
-    private String status; // "想读", "在读", "已读"
 
+    @SerializedName("publishingHouse")
+    private String publishingHouse;
+
+    @SerializedName("translator")
+    private String translator;
+
+    @SerializedName("publishDate")
+    private String publishDate;
+
+    @SerializedName("pages")
+    private int pages;
+
+    @SerializedName("ISBN")
+    private String isbn;
+
+    @SerializedName("price")
+    private double price;
+
+    @SerializedName("briefIntroduction")
+    private String briefIntroduction;
+
+    @SerializedName("authorIntroduction")
+    private String authorIntroduction;
+
+    @SerializedName("imgUrl")
+    private String imgUrl;
+
+    @SerializedName("delFlg")
+    private int delFlg;
+
+    // Parcelable 实现开始 ======================================
+    protected Book(Parcel in) {
+        // 必须严格按照写入顺序读取
+        id = in.readInt();
+        bookName = in.readString();
+        author = in.readString();
+        publishingHouse = in.readString();
+        translator = in.readString();
+        publishDate = in.readString();
+        pages = in.readInt();
+        isbn = in.readString();
+        price = in.readDouble();
+        briefIntroduction = in.readString();
+        authorIntroduction = in.readString();
+        imgUrl = in.readString();
+        delFlg = in.readInt();
+        categoryName = in.readString();
+    }
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        // 必须严格按照构造函数顺序写入
+        dest.writeInt(id);
+        dest.writeString(bookName);
+        dest.writeString(author);
+        dest.writeString(publishingHouse);
+        dest.writeString(translator);
+        dest.writeString(publishDate);
+        dest.writeInt(pages);
+        dest.writeString(isbn);
+        dest.writeDouble(price);
+        dest.writeString(briefIntroduction);
+        dest.writeString(authorIntroduction);
+        dest.writeString(imgUrl);
+        dest.writeInt(delFlg);
+        dest.writeString(categoryName);
+    }
+    // Parcelable 实现结束 =====================================
+
+    // 原有构造函数 --------------------------------------------
     public Book(String title, String author, String category, String imageUrl, float rating) {
-        this.title = title;
+        this.bookName = title;
         this.author = author;
-        this.category = category;
-        this.imageUrl = imageUrl;
-        this.rating = rating;
-        this.isBorrowed = false;
-        this.isWishlisted = false;
-        this.status = "";
+        this.publishingHouse = category;
+        this.imgUrl = imageUrl;
+        this.price = rating;
     }
 
-    // Getters and Setters
-    public String getTitle() {
-        return title;
+    public Book() {} // 必须保留无参构造
+
+    // Getters & Setters --------------------------------------
+    public String getCategoryName() {
+        return categoryName;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public int getId() {
+        return id;
+    }
+
+    public String getBookName() {
+        return bookName;
     }
 
     public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
-        this.author = author;
+    public String getPublishingHouse() {
+        return publishingHouse;
     }
 
-    public String getCategory() {
-        return category;
+    public String getTranslator() {
+        return translator;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public String getPublishDate() {
+        return publishDate;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public int getPages() {
+        return pages;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public String getIsbn() {
+        return isbn;
     }
 
-    public float getRating() {
-        return rating;
+    public double getPrice() {
+        return price;
     }
 
-    public void setRating(float rating) {
-        this.rating = rating;
+    public String getBriefIntroduction() {
+        return briefIntroduction;
     }
 
-    public boolean isBorrowed() {
-        return isBorrowed;
+    public String getAuthorIntroduction() {
+        return authorIntroduction;
     }
 
-    public void setBorrowed(boolean borrowed) {
-        isBorrowed = borrowed;
+    public String getImgUrl() {
+        return imgUrl;
     }
 
-    public boolean isWishlisted() {
-        return isWishlisted;
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
-    public void setWishlisted(boolean wishlisted) {
-        isWishlisted = wishlisted;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public int getDelFlg() {
+        return delFlg;
     }
 }

@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: jdbc:mysql://47.98.61.53:3306/ad?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://47.98.61.53:3306/ad?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
     username: remote_user
     password: Fengkefeng666!
+#    url: jdbc:mysql://localhost:13306/ad?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci
+#    username: root
+#    password: 123456
     driver-class-name: com.mysql.jdbc.Driver # 注意不要用 cj.jdbc.Driver（适用于 MySQL 8+）
 mybatis:
   mapper-locations: classpath:mapper/*.xml

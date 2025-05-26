@@ -41,15 +41,21 @@
             android:value="34fad77680d92978fde97015be1605c3">
 
         </meta-data>
-        
+
         <!-- 校园活动相关Activity -->
+        <activity
+            android:name=".activity.BookDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
         <activity
             android:name=".CampusEventsActivity"
             android:exported="true" />
         <activity
             android:name=".EventDetailActivity"
             android:exported="false" />
-            
+
+
         <!-- 失物招领Activity -->
         <activity
             android:name=".LostFoundActivity"
@@ -60,7 +66,7 @@
         <activity
             android:name=".LostFoundDetailActivity"
             android:exported="false" />
-            
+
         <activity
             android:name=".SchoolMapActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
@@ -101,8 +107,8 @@
 
         <!-- 修改后的StuCardActivity配置 -->
         <activity
-        android:name=".StuCardActivity"
-        android:exported="true" /> <!-- 必须设置为true -->
+            android:name=".StuCardActivity"
+            android:exported="true" /> <!-- 必须设置为true -->
         <!-- <activity -->
         <!-- android:name=".HomeActivity" -->
         <activity android:name=".FoodDetailActivity" /> <!-- android:exported="true" /> -->
@@ -124,6 +130,35 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="false" />
+
+        <!-- 新闻模块相关Activity -->
+        <activity
+            android:name=".news.activity.NewsListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".news.activity.NewsDetailActivity"
+            android:exported="false" />
+
+        <!-- 校园卡管理模块相关Activity -->
+        <activity
+            android:name=".campuscard.activity.CampusCardActivity"
+            android:exported="false" />
+
+
+        <!-- 校园卡管理子功能Activity -->
+        <activity
+            android:name=".campuscard.activity.BillActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.CardRechargeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.InternetFeeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".campuscard.activity.LossUnlossActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
