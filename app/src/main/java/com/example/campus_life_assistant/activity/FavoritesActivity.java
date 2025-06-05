@@ -1,13 +1,19 @@
+// ✅ 优化后的 FavoritesActivity.java，统一样式、支持空状态提示和Toolbar标题
 package com.example.campus_life_assistant.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.campus_life_assistant.LoginActivity;
 import com.example.campus_life_assistant.R;
 import com.example.campus_life_assistant.Adapter.BookAdapter;
 import com.example.campus_life_assistant.model.Book;
@@ -24,29 +30,35 @@ public class FavoritesActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private BookAdapter adapter;
     private List<Book> favoriteBooks = new ArrayList<>();
+    private TextView tvEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorites);
 
+        setupToolbar();
         initViews();
         checkAuthAndLoadData();
         setupAdapterClick();
     }
 
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("我的收藏");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     private void initViews() {
         recyclerView = findViewById(R.id.rv_favorites);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        tvEmpty = findViewById(R.id.tv_empty);
 
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new BookAdapter(this, favoriteBooks);
         recyclerView.setAdapter(adapter);
-
-        // 设置返回按钮
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("我的收藏");
-        }
     }
 
     private void checkAuthAndLoadData() {
@@ -55,6 +67,7 @@ public class FavoritesActivity extends AppCompatActivity {
 
         if (TextUtils.isEmpty(token)) {
             Toast.makeText(this, "请先登录", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
@@ -64,28 +77,30 @@ public class FavoritesActivity extends AppCompatActivity {
 
     private void loadFavoriteBooks(String token) {
         ApiService apiService = RetrofitClient.getRetrofitInstance().create(ApiService.class);
-        Call<List<Book>> call = apiService.getFavorites(token); // 添加token参数
+        Call<List<Book>> call = apiService.getFavorites("Bearer " + token);
         call.enqueue(new Callback<List<Book>>() {
             @Override
             public void onResponse(Call<List<Book>> call, Response<List<Book>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     favoriteBooks.clear();
                     favoriteBooks.addAll(markFavorites(response.body()));
-                    adapter.updateData(favoriteBooks);
+                    adapter.notifyDataSetChanged();
+                    toggleEmptyState(favoriteBooks.isEmpty());
                 } else {
-                    showEmptyState();
+                    showError("服务器错误: " + response.code());
+                    toggleEmptyState(true);
                 }
             }
 
             @Override
             public void onFailure(Call<List<Book>> call, Throwable t) {
-                Toast.makeText(FavoritesActivity.this, "网络错误：" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                showError("网络错误: " + t.getMessage());
+                toggleEmptyState(true);
             }
         });
     }
 
     private List<Book> markFavorites(List<Book> books) {
-        // 确保所有返回的书籍标记为收藏状态
         for (Book book : books) {
             book.setFavorite(true);
         }
@@ -93,20 +108,11 @@ public class FavoritesActivity extends AppCompatActivity {
     }
 
     private void setupAdapterClick() {
-        adapter.setOnItemClickListener(bookId -> {
-            // 点击跳转到书籍详情（复用原有逻辑）
-            navigateToBookDetail(bookId);
-        });
-
-        adapter.setOnFavoriteClickListener((book, position) -> {
-            // 处理取消收藏操作
-            handleUnfavorite(book, position);
-        });
+        adapter.setOnItemClickListener(bookId -> navigateToBookDetail(bookId));
+        adapter.setOnFavoriteClickListener((book, position) -> handleUnfavorite(book, position));
     }
 
     private void navigateToBookDetail(int bookId) {
-        // 这里需要根据你的实现获取完整的Book对象（可能需要调用接口）
-        // 此处简化为直接传递ID
         Intent intent = new Intent(this, BookDetailActivity.class);
         intent.putExtra("book_id", bookId);
         startActivity(intent);
@@ -121,9 +127,9 @@ public class FavoritesActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
-                            // 本地删除并刷新
                             favoriteBooks.remove(position);
                             adapter.notifyItemRemoved(position);
+                            toggleEmptyState(favoriteBooks.isEmpty());
                             Toast.makeText(FavoritesActivity.this, "已取消收藏", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -135,8 +141,14 @@ public class FavoritesActivity extends AppCompatActivity {
                 });
     }
 
-    private void showEmptyState() {
-        Toast.makeText(this, "您还没有收藏任何书籍", Toast.LENGTH_SHORT).show();
+    private void toggleEmptyState(boolean isEmpty) {
+        tvEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        if (isEmpty) tvEmpty.setText("暂无收藏书籍，快去添加一些感兴趣的吧！");
+    }
+
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

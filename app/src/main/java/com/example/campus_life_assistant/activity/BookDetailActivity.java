@@ -3,10 +3,12 @@ package com.example.campus_life_assistant.activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.example.campus_life_assistant.LoginActivity;
 import com.example.campus_life_assistant.R;
@@ -22,6 +24,7 @@ public class BookDetailActivity extends AppCompatActivity {
     private Book book;
     private SharedPreferences sharedPref;
     private ImageView ivFavorite;
+    private int bookId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +32,75 @@ public class BookDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         sharedPref = getSharedPreferences("user_session", MODE_PRIVATE);
+
+        // 设置 Toolbar
+        setupToolbar();
+
+        // 获取书籍ID
+        bookId = getIntent().getIntExtra("book_id", -1);
         book = getIntent().getParcelableExtra("book_data");
+
+        if (bookId == -1 && book != null) {
+            bookId = book.getId();
+        }
+
+        if (bookId == -1) {
+            Toast.makeText(this, "书籍信息错误", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         ivFavorite = findViewById(R.id.iv_favorite);
 
-        setupViews();
-        setupFavoriteButton();
-        recordViewHistory();
+        // 加载完整的书籍信息（包括收藏状态）
+        loadBookDetails();
+    }
+
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("书籍详情");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        }
+    }
+
+    private void loadBookDetails() {
+        String token = sharedPref.getString("token", "");
+
+        ApiService api = RetrofitClient.getRetrofitInstance().create(ApiService.class);
+        Call<Book> call;
+
+        if (!TextUtils.isEmpty(token)) {
+            // 已登录用户，获取包含收藏状态的详情
+            call = api.getBookDetailsWithFavorite(bookId, "Bearer " + token);
+        } else {
+            // 未登录用户，获取基本详情
+            call = api.getBookDetails(bookId);
+        }
+
+        call.enqueue(new Callback<Book>() {
+            @Override
+            public void onResponse(Call<Book> call, Response<Book> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    book = response.body();
+                    setupViews();
+                    setupFavoriteButton();
+                    recordViewHistory();
+                } else {
+                    Toast.makeText(BookDetailActivity.this, "获取书籍信息失败", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Book> call, Throwable t) {
+                Toast.makeText(BookDetailActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     private void setupViews() {
@@ -52,11 +118,12 @@ public class BookDetailActivity extends AppCompatActivity {
         publishingHouse.setText("出版社：" + book.getPublishingHouse());
         publishDate.setText("出版日期：" + book.getPublishDate());
         isbn.setText("ISBN：" + book.getIsbn());
-        price.setText("价格：" + book.getPrice() + "元");
-        briefIntroduction.setText("内容简介：\n" + book.getBriefIntroduction());
+        price.setText("价格：￥" + book.getPrice());
+        briefIntroduction.setText("内容简介：\n" + (book.getBriefIntroduction() != null ? book.getBriefIntroduction() : "暂无简介"));
 
         Glide.with(this)
                 .load("http://10.0.2.2:8081/images/" + book.getImgUrl())
+                .placeholder(android.R.drawable.ic_menu_gallery)
                 .error(android.R.drawable.stat_notify_error)
                 .into(imageView);
     }
@@ -84,6 +151,9 @@ public class BookDetailActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     book.setFavorite(!book.isFavorite());
                     updateFavoriteIcon();
+                    Toast.makeText(BookDetailActivity.this,
+                            book.isFavorite() ? "已收藏" : "已取消收藏",
+                            Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(BookDetailActivity.this, "操作失败，错误码：" + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -97,24 +167,36 @@ public class BookDetailActivity extends AppCompatActivity {
     }
 
     private void updateFavoriteIcon() {
-        ivFavorite.setImageResource(book.isFavorite() ?
-                R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+        if (book != null) {
+            ivFavorite.setImageResource(book.isFavorite() ?
+                    R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
+        }
     }
 
     private void recordViewHistory() {
         if (!isUserLoggedIn()) return;
         String token = "Bearer " + sharedPref.getString("token", "");
         ApiService api = RetrofitClient.getRetrofitInstance().create(ApiService.class);
-        api.recordView(book.getId(), token).enqueue(new Callback<Void>() { // 修正参数顺序
+        api.recordView(book.getId(), token).enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {}
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                // 静默记录，不需要提示
+            }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {}
+            public void onFailure(Call<Void> call, Throwable t) {
+                // 静默失败，不影响用户体验
+            }
         });
     }
 
     private boolean isUserLoggedIn() {
-        return sharedPref.contains("token");
+        return sharedPref.contains("token") && !TextUtils.isEmpty(sharedPref.getString("token", ""));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
     }
 }

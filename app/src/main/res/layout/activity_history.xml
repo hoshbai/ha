@@ -5,30 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- 加载进度条 -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:visibility="gone"/>
-
-        <!-- 空数据提示 -->
-        <TextView
-            android:id="@+id/tv_empty"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:padding="16dp"
-            android:visibility="gone"/>
-
-        <!-- 书籍列表 -->
+        <!-- 1. 列表在最底层 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_history"
             android:layout_width="match_parent"
@@ -36,5 +17,24 @@
             android:clipToPadding="false"
             android:paddingVertical="8dp"/>
 
-    </RelativeLayout>
+        <!-- 2. 加载进度在中间 -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+        <!-- 3. 空数据提示在最顶层 -->
+        <TextView
+            android:id="@+id/tv_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:padding="16dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

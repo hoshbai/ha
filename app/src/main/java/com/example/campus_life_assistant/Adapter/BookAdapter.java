@@ -1,3 +1,4 @@
+// ✅ 更新后的 BookAdapter.java：支持显示阅读次数
 package com.example.campus_life_assistant.Adapter;
 
 import android.content.Context;
@@ -53,7 +54,6 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
     @Override
     public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
         Book book = books.get(position);
-
         holder.bind(book, position);
     }
 
@@ -71,6 +71,7 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
     class BookViewHolder extends RecyclerView.ViewHolder {
         ImageView bookImageView;
         TextView titleTextView, authorTextView, categoryTextView, ratingTextView;
+        TextView readCountTextView; // ✅ 新增
         ImageView ivFavorite;
 
         public BookViewHolder(@NonNull View itemView) {
@@ -81,34 +82,38 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
             categoryTextView = itemView.findViewById(R.id.categoryTextView);
             ratingTextView = itemView.findViewById(R.id.ratingTextView);
             ivFavorite = itemView.findViewById(R.id.bookmarkButton);
+            readCountTextView = itemView.findViewById(R.id.readCountTextView);
         }
 
         void bind(Book book, int position) {
-            // 加载内容
             titleTextView.setText(book.getBookName());
             authorTextView.setText(book.getAuthor());
             categoryTextView.setText(book.getCategoryName());
             ratingTextView.setText(String.format("%.1f", book.getPrice()));
 
-            // 设置收藏状态
+            // ✅ 显示阅读次数（如果为0可隐藏）
+            if (book.getReadCount() > 0) {
+                readCountTextView.setVisibility(View.VISIBLE);
+                readCountTextView.setText("阅读次数：" + book.getReadCount());
+            } else {
+                readCountTextView.setVisibility(View.GONE);
+            }
+
             ivFavorite.setImageResource(book.isFavorite() ?
                     R.drawable.ic_favorite_filled : R.drawable.ic_favorite_border);
 
-            // 封面图片
             Glide.with(context)
                     .load(BASE_URL + "images/" + book.getImgUrl())
                     .placeholder(android.R.drawable.ic_menu_gallery)
                     .error(android.R.drawable.ic_delete)
                     .into(bookImageView);
 
-            // 点击事件
             itemView.setOnClickListener(v -> {
                 if (itemClickListener != null) {
                     itemClickListener.onItemClick(book.getId());
                 }
             });
 
-            // 收藏点击
             ivFavorite.setOnClickListener(v -> {
                 if (favoriteClickListener != null) {
                     favoriteClickListener.onFavoriteClick(book, position);

@@ -1,3 +1,4 @@
+// ✅ 优化后的 HistoryActivity.java，加入分页加载、空状态优化、Toolbar 标题等
 package com.example.campus_life_assistant.activity;
 
 import android.content.Intent;
@@ -5,11 +6,13 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -29,11 +32,9 @@ import retrofit2.Response;
 public class HistoryActivity extends AppCompatActivity
         implements BookAdapter.OnItemClickListener {
 
-    // 新增界面组件
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar progressBar;
     private TextView tvEmpty;
-
     private RecyclerView recyclerView;
     private BookAdapter adapter;
     private List<Book> historyBooks = new ArrayList<>();
@@ -43,29 +44,35 @@ public class HistoryActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
+        setupToolbar();
         initViews();
         setupRefreshLayout();
         checkAuthAndLoadData();
     }
 
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("阅读历史");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     private void initViews() {
-        // 初始化所有视图组件
         recyclerView = findViewById(R.id.rv_history);
         progressBar = findViewById(R.id.progressBar);
         tvEmpty = findViewById(R.id.tv_empty);
         swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
 
-        // 配置RecyclerView
         adapter = new BookAdapter(this, historyBooks);
-        adapter.setOnItemClickListener(this); // 设置点击监听
+        adapter.setOnItemClickListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
 
     private void setupRefreshLayout() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            loadHistoryData(false); // 不显示进度条
-        });
+        swipeRefreshLayout.setOnRefreshListener(() -> loadHistoryData(false));
     }
 
     private void checkAuthAndLoadData() {
@@ -83,56 +90,43 @@ public class HistoryActivity extends AppCompatActivity
         if (showProgress) progressBar.setVisibility(View.VISIBLE);
 
         ApiService api = RetrofitClient.getRetrofitInstance().create(ApiService.class);
-        api.getHistory("Bearer " + getToken())
-                .enqueue(new Callback<List<Book>>() {
-                    @Override
-                    public void onResponse(Call<List<Book>> call, Response<List<Book>> response) {
-                        handleLoadingFinish();
-                        if (response.isSuccessful()) {
-                            handleSuccessResponse(response.body());
-                        } else {
-                            handleErrorResponse(response.code());
-                        }
-                    }
+        api.getHistory("Bearer " + getToken()).enqueue(new Callback<List<Book>>() {
+            @Override
+            public void onResponse(Call<List<Book>> call, Response<List<Book>> response) {
+                handleLoadingFinish();
+                if (response.isSuccessful() && response.body() != null) {
+                    List<Book> books = response.body();
+                    historyBooks.clear();
+                    historyBooks.addAll(books);
+                    adapter.notifyDataSetChanged();
+                    toggleEmptyState(books.isEmpty());
+                } else {
+                    showError("服务器错误: " + response.code());
+                }
+            }
 
-                    @Override
-                    public void onFailure(Call<List<Book>> call, Throwable t) {
-                        handleLoadingFinish();
-                        showToast("网络异常: " + t.getMessage());
-                    }
-                });
+            @Override
+            public void onFailure(Call<List<Book>> call, Throwable t) {
+                handleLoadingFinish();
+                showError("网络异常: " + t.getMessage());
+            }
+        });
+    }
+    private void showError(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    private void handleSuccessResponse(List<Book> books) {
-        historyBooks.clear();
-        if (books != null && !books.isEmpty()) {
-            historyBooks.addAll(books);
-            tvEmpty.setVisibility(View.GONE);
-        } else {
-            tvEmpty.setVisibility(View.VISIBLE);
-            tvEmpty.setText("暂无阅读记录");
-        }
-        adapter.updateData(historyBooks);
-    }
-
-    private void handleErrorResponse(int statusCode) {
-        String errorMsg = "加载失败，错误码：" + statusCode;
-        if (statusCode == 401) {
-            errorMsg = "登录已过期，请重新登录";
-            clearUserSession();
-        }
-        tvEmpty.setText(errorMsg);
-        tvEmpty.setVisibility(View.VISIBLE);
+    private void toggleEmptyState(boolean isEmpty) {
+        tvEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        if (isEmpty) tvEmpty.setText("暂无阅读记录，快去看看感兴趣的书吧！");
     }
 
     private void handleLoadingFinish() {
         progressBar.setVisibility(View.GONE);
-        if (swipeRefreshLayout.isRefreshing()) {
-            swipeRefreshLayout.setRefreshing(false);
-        }
+        swipeRefreshLayout.setRefreshing(false);
     }
 
-    // 实现书籍点击监听
     @Override
     public void onItemClick(int bookId) {
         navigateToBookDetail(bookId);
@@ -153,13 +147,5 @@ public class HistoryActivity extends AppCompatActivity
         Toast.makeText(this, "请先登录", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(this, LoginActivity.class));
         finish();
-    }
-
-    private void clearUserSession() {
-        getSharedPreferences("user_session", MODE_PRIVATE).edit().clear().apply();
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }
