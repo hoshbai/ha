@@ -1,13 +1,14 @@
 package com.example.campus_life_assistant;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.Context; // Import Context
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager; // Import ConnectivityManager
-import android.net.NetworkCapabilities; // Use NetworkCapabilities for modern check
-import android.net.NetworkInfo; // Keep for older API levels if needed, but prefer NetworkCapabilities
-import android.os.Build; // Import Build
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,96 +16,77 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull; // Import NonNull
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment; // Import Fragment
-import androidx.fragment.app.FragmentManager; // Import FragmentManager
-import androidx.fragment.app.FragmentTransaction; // Import FragmentTransaction
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.example.campus_life_assistant.Dao.DatabaseHelper;
 import com.example.campus_life_assistant.fragment.HomeFragment;
 import com.example.campus_life_assistant.fragment.ProfileFragment;
 import com.example.campus_life_assistant.fragment.SchoolFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
-
-import java.util.concurrent.ExecutorService; // Import ExecutorService
-import java.util.concurrent.Executors; // Import Executors
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
-
-
     private static final String TAG = "MainActivity";
     private BottomNavigationView bottomNavigationView;
     private TextView connectionStatusText;
     private ProgressBar connectionProgressBar;
     private Button retryButton;
     private Button tryLocalButton;
-    private View statusContainer; // Container for status views
-
-    // Use a single thread executor for background tasks
+    private View statusContainer;
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private DatabaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // 检查用户是否已登录
         SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
         String username = sharedPref.getString("username", null);
         String token = sharedPref.getString("token", null);
         if (username == null || token == null) {
-            // 用户未登录，跳转到 LoginActivity
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // 清除当前栈
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            finish(); // 关闭当前 MainActivity
-            return; // 提前返回，避免继续执行后续代码
+            finish();
+            return;
         }
-        // 将连接状态面板隐藏
+
         View statusPanel = findViewById(R.id.connection_status_panel);
         if (statusPanel != null) {
             statusPanel.setVisibility(View.GONE);
         }
-        dbHelper = new DatabaseHelper(this); // Initialize DatabaseHelper
 
-        // Initialize UI elements
+        dbHelper = new DatabaseHelper(this);
+
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         connectionStatusText = findViewById(R.id.connection_status_text);
         connectionProgressBar = findViewById(R.id.connection_progress);
         retryButton = findViewById(R.id.retry_button);
         tryLocalButton = findViewById(R.id.try_local_button);
 
-        // Handle case where status views might not exist in layout
         if (statusContainer == null || connectionStatusText == null || connectionProgressBar == null || retryButton == null || tryLocalButton == null) {
             Log.w(TAG, "One or more connection status views not found in layout. Status display might be limited.");
-            // Optionally use Snackbar as fallback (or ensure layout is correct)
-            // setupTemporaryConnectionStatusViews(); // If you want Snackbar fallback
         }
 
-        // Setup button listeners
         if (retryButton != null) {
             retryButton.setOnClickListener(v -> attemptConnectionWithNetworkCheck());
         }
-
         if (tryLocalButton != null) {
             tryLocalButton.setOnClickListener(v -> tryLocalConnection());
         }
 
-        // Load initial fragment
         if (savedInstanceState == null) {
             loadFragment(new HomeFragment());
         }
 
-        // Setup bottom navigation listener
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
-
             if (itemId == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
             } else if (itemId == R.id.nav_profile) {
@@ -112,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_school) {
                 selectedFragment = new SchoolFragment();
             }
-            // Add other navigation cases here...
-
             if (selectedFragment != null) {
                 loadFragment(selectedFragment);
                 return true;
@@ -121,189 +101,137 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        // Perform initial connection test on startup
         attemptConnectionWithNetworkCheck();
     }
 
-    /**
-     * Replaces the current fragment in the frame_container.
-     * @param fragment The fragment to load.
-     */
     private void loadFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_container, fragment);
-        // fragmentTransaction.addToBackStack(null); // Optional: if you want back navigation for fragments
         fragmentTransaction.commit();
     }
 
-    /**
-     * Checks for network connectivity before attempting the primary database connection.
-     */
     private void attemptConnectionWithNetworkCheck() {
         if (!isNetworkAvailable()) {
-            Log.w(TAG, "网络连接检查失败。"); // Network connectivity check failed.
-            updateConnectionStatusUI("无网络连接", false); // No network connection
+            Log.w(TAG, "网络连接检查失败。");
+            updateConnectionStatusUI("无网络连接", false);
             showConnectionErrorDialog("网络错误", "设备当前没有连接到网络。\n请检查您的 Wi-Fi 或移动数据连接。");
-            // Network Error, Device is not currently connected to the network. Please check Wi-Fi or mobile data.
-            return; // Stop if no network
+            return;
         }
-        // Network available, proceed with the database test
         testDatabaseConnection();
     }
 
-    /**
-     * Checks if the device has an active network connection capable of reaching the internet.
-     * Uses NetworkCapabilities for modern Android versions.
-     * Requires ACCESS_NETWORK_STATE permission.
-     * @return true if a network connection is available, false otherwise.
-     */
+    @SuppressLint("MissingPermission")
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager == null) {
-            Log.e(TAG,"无法获取 ConnectivityManager"); // Cannot get ConnectivityManager
-            return false;
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Use NetworkCapabilities for API 23+
-            android.net.Network network = connectivityManager.getActiveNetwork();
-            if (network == null) {
-                Log.w(TAG, "isNetworkAvailable: No active network.");
-                return false;
-            }
-            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(network);
-            // Check for internet capability and validated (actual internet access)
-            boolean connected = capabilities != null &&
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NetworkCapabilities capabilities = cm.getNetworkCapabilities(cm.getActiveNetwork());
+            return capabilities != null &&
                     (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
                             capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) &&
-                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-            Log.d(TAG, "isNetworkAvailable (API 23+): " + connected);
-            return connected;
-
-        } else { // Fallback for older APIs (less reliable for actual internet access)
+                            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        } else {
             @SuppressWarnings("deprecation")
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            boolean connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
-            Log.d(TAG, "isNetworkAvailable (API < 23): " + connected);
-            return connected;
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            return activeNetwork != null && activeNetwork.isConnected();
         }
     }
 
-    /**
-     * Executes the primary database connection test in a background thread.
-     */
     private void testDatabaseConnection() {
-        Log.i(TAG, "开始执行主数据库连接测试..."); // Starting main database connection test...
-        updateConnectionStatusUI("正在连接主数据库...", true); // Connecting to main database...
+        Log.i(TAG, "开始执行主数据库连接测试...");
+        updateConnectionStatusUI("正在连接主数据库...", true);
 
-        // Use the single executor service
         executorService.execute(() -> {
-            final DatabaseHelper.ConnectionResult result = dbHelper.testConnection(); // Get the detailed result
-
-            // Update UI back on the main thread
+            final DatabaseHelper.ConnectionResult result = dbHelper.testConnection();
             runOnUiThread(() -> {
                 updateConnectionStatusUI(result.status + (result.success ? " ✓" : " ✗"), false);
                 if (result.success) {
-                    Log.i(TAG, "主数据库连接成功。"); // Main database connection successful.
-                    showConnectionToast("主数据库连接成功"); // Main database connection successful
+                    Log.i(TAG, "主数据库连接成功。");
+                    showConnectionToast("主数据库连接成功");
                 } else {
-                    // Log the detailed error here as well
-                    Log.e(TAG, "主数据库连接失败。 Status: " + result.status + ", Details: " + result.details, result.exception); // Main DB connection failed.
-                    showConnectionErrorDialog(result); // Show detailed error dialog from result
+                    Log.e(TAG, "主数据库连接失败。 Status: " + result.status + ", Details: " + result.details, result.exception);
+                    attemptLocalConnectionAutomatically(); // 自动尝试本地连接
                 }
             });
         });
     }
 
-    /**
-     * Executes the local database connection test in a background thread.
-     */
-    private void tryLocalConnection() {
-        Log.i(TAG, "开始执行本地数据库连接测试..."); // Starting local database connection test...
-        updateConnectionStatusUI("正在尝试本地连接...", true); // Trying local connection...
+    private void attemptLocalConnectionAutomatically() {
+        Log.i(TAG, "开始自动尝试本地数据库连接...");
+        updateConnectionStatusUI("正在尝试本地连接...", true);
 
         executorService.execute(() -> {
-            final DatabaseHelper.ConnectionResult result = dbHelper.tryLocalConnection();
-
+            final DatabaseHelper.ConnectionResult localResult = dbHelper.tryLocalConnection();
             runOnUiThread(() -> {
-                updateConnectionStatusUI("本地连接: " + result.status + (result.success ? " ✓" : " ✗"), false); // Local connection:
-                if (result.success) {
-                    Log.i(TAG, "本地数据库连接成功。"); // Local database connection successful.
-                    // Show details even on success for local, as it's often for debugging
-                    showConnectionDialog("本地连接成功", result.details); // Local connection successful
+                updateConnectionStatusUI("本地连接: " + localResult.status + (localResult.success ? " ✓" : " ✗"), false);
+                if (localResult.success) {
+                    Log.i(TAG, "自动本地连接成功");
+                    View statusPanel = findViewById(R.id.connection_status_panel);
+                    if (statusPanel != null) {
+                        statusPanel.setVisibility(View.GONE);
+                    }
                 } else {
-                    Log.e(TAG, "本地数据库连接失败。 Status: " + result.status + ", Details: " + result.details, result.exception); // Local DB connection failed.
-                    showConnectionErrorDialog(result); // Show detailed error dialog
+                    Log.e(TAG, "自动本地连接失败");
+                    showConnectionErrorDialog(localResult);
                 }
             });
         });
     }
 
-    /**
-     * Updates the connection status UI elements (TextView, ProgressBar, Buttons).
-     * Handles cases where views might not be found.
-     */
+    private void tryLocalConnection() {
+        Log.i(TAG, "开始执行本地数据库连接测试...");
+        updateConnectionStatusUI("正在尝试本地连接...", true);
+        executorService.execute(() -> {
+            final DatabaseHelper.ConnectionResult result = dbHelper.tryLocalConnection();
+            runOnUiThread(() -> {
+                updateConnectionStatusUI("本地连接: " + result.status + (result.success ? " ✓" : " ✗"), false);
+                if (result.success) {
+                    Log.i(TAG, "本地数据库连接成功。");
+                    showConnectionDialog("本地连接成功", result.details);
+                } else {
+                    Log.e(TAG, "本地数据库连接失败。 Status: " + result.status + ", Details: " + result.details, result.exception);
+                    showConnectionErrorDialog(result);
+                }
+            });
+        });
+    }
+
     private void updateConnectionStatusUI(String status, boolean inProgress) {
-        Log.d(TAG, "更新连接状态 UI: Status='" + status + "', InProgress=" + inProgress); // Updating connection status UI...
+        Log.d(TAG, "更新连接状态 UI: Status='" + status + "', InProgress=" + inProgress);
         if (connectionStatusText != null) {
             connectionStatusText.setText(status);
-            // Optionally change text color based on success/failure/progress
-            // connectionStatusText.setTextColor(getResources().getColor(inProgress ? R.color.colorPending : (status.contains("✓") ? R.color.colorSuccess : R.color.colorError)));
-        } else {
-            Log.w(TAG,"connectionStatusText is null, cannot update status text.");
         }
-
         if (connectionProgressBar != null) {
             connectionProgressBar.setVisibility(inProgress ? View.VISIBLE : View.GONE);
-        } else {
-            Log.w(TAG,"connectionProgressBar is null, cannot update progress visibility.");
         }
-
-        // Enable/disable buttons based on progress
         if (retryButton != null) {
             retryButton.setEnabled(!inProgress);
-        } else {
-            Log.w(TAG, "retryButton is null, cannot update enabled state.");
         }
-
         if (tryLocalButton != null) {
             tryLocalButton.setEnabled(!inProgress);
-        } else {
-            Log.w(TAG, "tryLocalButton is null, cannot update enabled state.");
         }
     }
 
-    /**
-     * Shows a detailed connection error dialog using information from ConnectionResult.
-     */
     private void showConnectionErrorDialog(@NonNull DatabaseHelper.ConnectionResult result) {
-        // Use the status as title and details as message
         showConnectionErrorDialog(result.status, result.details);
     }
 
-    /**
-     * Shows a generic connection error dialog with Retry and Try Local options.
-     */
     private void showConnectionErrorDialog(String title, String message) {
         if (isFinishing() || isDestroyed()) {
             Log.w(TAG, "Activity is finishing, cannot show error dialog.");
-            return; // Don't show dialog if activity is finishing
+            return;
         }
         new AlertDialog.Builder(this)
-                .setTitle("连接错误: " + title) // Connection Error:
+                .setTitle("连接错误: " + title)
                 .setMessage(message)
-                .setPositiveButton("重试主连接", (dialog, which) -> attemptConnectionWithNetworkCheck()) // Retry Main Connection
-                .setNeutralButton("尝试本地连接", (dialog, which) -> tryLocalConnection()) // Try Local Connection
-                .setNegativeButton("确定", null) // OK
-                .setCancelable(false) // Prevent dismissing by tapping outside
+                .setPositiveButton("重试主连接", (dialog, which) -> attemptConnectionWithNetworkCheck())
+                .setNeutralButton("尝试本地连接", (dialog, which) -> tryLocalConnection())
+                .setNegativeButton("确定", null)
+                .setCancelable(false)
                 .show();
     }
 
-    /**
-     * Shows a simple informational dialog.
-     */
     private void showConnectionDialog(String title, String message) {
         if (isFinishing() || isDestroyed()) {
             Log.w(TAG, "Activity is finishing, cannot show info dialog.");
@@ -312,39 +240,20 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("确定", null) // OK
+                .setPositiveButton("确定", null)
                 .show();
     }
 
-    /**
-     * Shows a brief Toast message.
-     */
     private void showConnectionToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Fallback method to show status via Snackbar if layout views are missing.
-     * Not typically needed if layout is correct.
-     */
-    private void setupTemporaryConnectionStatusViews() {
-        View rootView = findViewById(android.R.id.content);
-        Snackbar.make(rootView, "正在测试数据库连接...", Snackbar.LENGTH_INDEFINITE) // Testing database connection...
-                .setAction("详情", v -> { // Details
-                    // Show a simple dialog initially or when details action clicked
-                    showConnectionDialog("数据库连接状态", "请稍候..."); // Database Connection Status, Please wait...
-                })
-                .show();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Shutdown executor service to prevent resource leaks
         if (executorService != null && !executorService.isShutdown()) {
-            Log.d(TAG,"正在关闭 ExecutorService..."); // Shutting down ExecutorService...
+            Log.d(TAG, "正在关闭 ExecutorService...");
             executorService.shutdown();
         }
     }
-
 }
