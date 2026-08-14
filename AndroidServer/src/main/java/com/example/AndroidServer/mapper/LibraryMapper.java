@@ -6,10 +6,15 @@ import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+/**
+ * 图书馆数据访问层
+ * 包含收藏管理、阅读历史、图书详情、搜索分类等核心功能
+ */
 @Mapper
 public interface LibraryMapper {
 
-    // ====================== 收藏相关操作 ======================
+    // ====================== 核心数据操作 ======================
+    // 收藏管理
     @Select("""
         SELECT
             b.id,
@@ -34,18 +39,21 @@ public interface LibraryMapper {
           AND b.del_flg = 0
     """)
     List<Book> getFavoritesByUserId(@Param("userId") int userId);
+    // Mapper层：新增检查方法
+    @Select("SELECT COUNT(*) FROM favorite_books WHERE user_id = #{userId} AND book_id = #{bookId}")
+    int isFavorited(@Param("userId") int userId, @Param("bookId") int bookId);
 
     @Insert("INSERT INTO favorite_books (user_id, book_id) VALUES (#{userId}, #{bookId})")
+    @Options(useGeneratedKeys = false) // 禁用自动生成主键
     void addFavorite(@Param("userId") int userId, @Param("bookId") int bookId);
 
     @Delete("DELETE FROM favorite_books WHERE user_id = #{userId} AND book_id = #{bookId}")
     void removeFavorite(@Param("userId") int userId, @Param("bookId") int bookId);
 
-    // 检查用户是否收藏了某本书
     @Select("SELECT COUNT(*) > 0 FROM favorite_books WHERE user_id = #{userId} AND book_id = #{bookId}")
     boolean isFavorite(@Param("userId") int userId, @Param("bookId") int bookId);
 
-    // ====================== 阅读历史相关操作 ======================
+    // 阅读历史
     @Select("""
         SELECT
             b.id,
@@ -84,7 +92,7 @@ public interface LibraryMapper {
     """)
     void insertHistory(@Param("userId") int userId, @Param("bookId") int bookId);
 
-    // ====================== 图书详情与搜索 ======================
+    // ====================== 图书详情 ======================
     @Select("""
         SELECT
             b.id,
@@ -109,7 +117,6 @@ public interface LibraryMapper {
     """)
     Book getBookDetailsById(@Param("bookId") int bookId);
 
-    // 获取书籍详情（包含收藏状态和阅读次数）
     @Select("""
         SELECT
             b.id,
@@ -138,47 +145,43 @@ public interface LibraryMapper {
     """)
     Book getBookDetailsByIdWithUser(@Param("bookId") int bookId, @Param("userId") int userId);
 
-    @Select({
-            "<script>",
-            "SELECT ",
-            "  b.id, ",
-            "  b.book_name AS bookName, ",
-            "  b.author, ",
-            "  c.name AS categoryName, ",
-            "  b.publishing_house AS publishingHouse, ",
-            "  b.img_url AS imgUrl, ",
-            "  b.price ",
-            "FROM book_info b ",
-            "JOIN category c ON b.category_id = c.id ",
-            "WHERE b.del_flg = 0 ",
-            "  AND (b.book_name LIKE CONCAT('%',#{keyword},'%') ",
-            "       OR b.author LIKE CONCAT('%',#{keyword},'%') ",
-            "       OR c.name LIKE CONCAT('%',#{keyword},'%')) ",
-            "</script>"
-    })
+    // ====================== 搜索功能 ======================
+    @Select("""
+        SELECT
+            b.id,
+            b.book_name AS bookName,
+            b.author,
+            c.name AS categoryName,
+            b.publishing_house AS publishingHouse,
+            b.img_url AS imgUrl,
+            b.price
+        FROM book_info b
+        JOIN category c ON b.category_id = c.id
+        WHERE b.del_flg = 0
+          AND (b.book_name LIKE CONCAT('%',#{keyword},'%')
+               OR b.author LIKE CONCAT('%',#{keyword},'%')
+               OR c.name LIKE CONCAT('%',#{keyword},'%'))
+    """)
     List<Book> searchBooks(@Param("keyword") String keyword);
 
-    // 搜索书籍（包含收藏状态）
-    @Select({
-            "<script>",
-            "SELECT ",
-            "  b.id, ",
-            "  b.book_name AS bookName, ",
-            "  b.author, ",
-            "  c.name AS categoryName, ",
-            "  b.publishing_house AS publishingHouse, ",
-            "  b.img_url AS imgUrl, ",
-            "  b.price, ",
-            "  CASE WHEN f.book_id IS NOT NULL THEN 1 ELSE 0 END AS favorite ",
-            "FROM book_info b ",
-            "JOIN category c ON b.category_id = c.id ",
-            "LEFT JOIN favorite_books f ON b.id = f.book_id AND f.user_id = #{userId} ",
-            "WHERE b.del_flg = 0 ",
-            "  AND (b.book_name LIKE CONCAT('%',#{keyword},'%') ",
-            "       OR b.author LIKE CONCAT('%',#{keyword},'%') ",
-            "       OR c.name LIKE CONCAT('%',#{keyword},'%')) ",
-            "</script>"
-    })
+    @Select("""
+        SELECT
+            b.id,
+            b.book_name AS bookName,
+            b.author,
+            c.name AS categoryName,
+            b.publishing_house AS publishingHouse,
+            b.img_url AS imgUrl,
+            b.price,
+            CASE WHEN f.book_id IS NOT NULL THEN 1 ELSE 0 END AS favorite
+        FROM book_info b
+        JOIN category c ON b.category_id = c.id
+        LEFT JOIN favorite_books f ON b.id = f.book_id AND f.user_id = #{userId}
+        WHERE b.del_flg = 0
+          AND (b.book_name LIKE CONCAT('%',#{keyword},'%')
+               OR b.author LIKE CONCAT('%',#{keyword},'%')
+               OR c.name LIKE CONCAT('%',#{keyword},'%'))
+    """)
     List<Book> searchBooksWithUser(@Param("keyword") String keyword, @Param("userId") int userId);
 
     // ====================== 分类查询 ======================
@@ -206,7 +209,6 @@ public interface LibraryMapper {
     """)
     List<Book> getBooksByCategoryName(@Param("category") String category);
 
-    // 按分类查询书籍（包含收藏状态）
     @Select("""
         SELECT
             b.id,
@@ -257,7 +259,6 @@ public interface LibraryMapper {
     """)
     List<Book> getAllBooks();
 
-    // 获取所有书籍（包含收藏状态）
     @Select("""
         SELECT
             b.id,

@@ -18,22 +18,54 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/library")
 public class LibraryController {
-    @Autowired
-    private JwtUtil jwtUtil; // JWT工具类
 
     @Autowired
-    private UserMapper userMapper; // 用户Mapper
+    private JwtUtil jwtUtil;
 
     @Autowired
-    private LibraryMapper libraryMapper;
+    private UserMapper userMapper;
+
+    @Autowired
+    private LibraryMapper mapper;
+
+    // ✅ 合并接口：根据 token 动态处理登录/未登录状态
+    @GetMapping("/{bookId}")
+    public ResponseEntity<?> getBookDetails(
+            @PathVariable int bookId,
+            @RequestHeader(name = "Authorization", required = false) String token) {
+        if (token != null && !token.isEmpty()) {
+            // 已登录用户：获取包含收藏状态的详情
+            String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+            User user = userMapper.selectByNameOnly(username);
+            if (user == null) return ResponseEntity.status(401).build();
+
+            Book book = mapper.getBookDetailsByIdWithUser(bookId, user.getU_id());
+            if (book == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("code", 404);
+                error.put("message", "ID为 " + bookId + " 的图书不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+            return ResponseEntity.ok().body(book);
+        } else {
+            // 未登录用户：获取基础信息
+            Book book = mapper.getBookDetailsById(bookId);
+            if (book == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("code", 404);
+                error.put("message", "ID为 " + bookId + " 的图书不存在");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+            }
+            return ResponseEntity.ok().body(book);
+        }
+    }
 
     // 收藏相关接口
     @GetMapping("/favorites")
     public ResponseEntity<List<Book>> getFavorites(@RequestHeader("Authorization") String token) {
         String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         User user = userMapper.selectByNameOnly(username);
-        if(user == null) return ResponseEntity.status(401).build();
-
+        if (user == null) return ResponseEntity.status(401).build();
         List<Book> books = mapper.getFavoritesByUserId(user.getU_id());
         return ResponseEntity.ok(books);
     }
@@ -42,15 +74,16 @@ public class LibraryController {
     public ResponseEntity<?> toggleFavorite(
             @PathVariable int bookId,
             @RequestParam String action,
-            @RequestHeader("Authorization") String token) { // 确保使用正确的大小写
-        // 原认证逻辑保持不变
+            @RequestHeader("Authorization") String token) {
         String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         User user = userMapper.selectByNameOnly(username);
-        if(user == null) return ResponseEntity.status(401).build();
-        // 操作收藏
-        if("add".equals(action)){
-            mapper.addFavorite(user.getU_id(), bookId);
-        }else{
+        if (user == null) return ResponseEntity.status(401).build();
+
+        if ("add".equals(action)) {
+            if (!mapper.isFavorite(user.getU_id(), bookId)) {
+                mapper.addFavorite(user.getU_id(), bookId);
+            }
+        } else {
             mapper.removeFavorite(user.getU_id(), bookId);
         }
         return ResponseEntity.ok().build();
@@ -61,8 +94,7 @@ public class LibraryController {
     public ResponseEntity<List<Book>> getHistory(@RequestHeader("Authorization") String token) {
         String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         User user = userMapper.selectByNameOnly(username);
-        if(user == null) return ResponseEntity.status(401).build();
-
+        if (user == null) return ResponseEntity.status(401).build();
         List<Book> books = mapper.getHistoryByUserId(user.getU_id());
         return ResponseEntity.ok(books);
     }
@@ -71,37 +103,21 @@ public class LibraryController {
     public ResponseEntity<?> recordView(
             @PathVariable int bookId,
             @RequestHeader("Authorization") String token) {
-
         String username = jwtUtil.extractUsername(token.replace("Bearer ", ""));
         User user = userMapper.selectByNameOnly(username);
-        if(user == null) return ResponseEntity.status(401).build();
-
+        if (user == null) return ResponseEntity.status(401).build();
         mapper.insertHistory(user.getU_id(), bookId);
         return ResponseEntity.ok().build();
     }
 
-    @Autowired
-    private LibraryMapper mapper; // 确保实例注入正确
-
+    // 图书搜索
     @GetMapping("/search")
     public ResponseEntity<List<Book>> searchBooks(@RequestParam String keyword) {
         List<Book> books = mapper.searchBooks("%" + keyword + "%");
         return ResponseEntity.ok(books);
     }
-    // 根据图书 ID 查询详情
-    @GetMapping("/{bookId}")
-    public ResponseEntity<?> getBookDetails(@PathVariable int bookId) {
-        Book book = mapper.getBookDetailsById(bookId);
-        if (book == null) {
-            // 返回标准化错误格式
-            Map<String, Object> error = new HashMap<>();
-            error.put("code", 404);
-            error.put("message", "ID为 " + bookId + " 的图书不存在");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-        }
-        return ResponseEntity.ok().body(book);
-    }
 
+    // 所有图书（带分类）
     @GetMapping("/books")
     public ResponseEntity<List<Book>> allBooks(
             @RequestParam(value = "category", required = false, defaultValue = "全部") String category) {
@@ -114,12 +130,14 @@ public class LibraryController {
         return ResponseEntity.ok(books);
     }
 
+    // 更新图书状态（管理功能）
     @PostMapping("/books/{id}/status")
     public ResponseEntity<Void> updateStatus(@PathVariable int id, @RequestParam String status) {
         mapper.updateBookStatus(id, status);
         return ResponseEntity.ok().build();
     }
 
+    // 获取通知
     @GetMapping("/notifications")
     public ResponseEntity<List<LibraryNotification>> notifications() {
         return ResponseEntity.ok(mapper.getNotifications());

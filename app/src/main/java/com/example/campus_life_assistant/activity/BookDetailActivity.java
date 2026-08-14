@@ -1,5 +1,6 @@
 package com.example.campus_life_assistant.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -68,37 +69,29 @@ public class BookDetailActivity extends AppCompatActivity {
     }
 
     private void loadBookDetails() {
+        SharedPreferences sharedPref = getSharedPreferences("user_session", Context.MODE_PRIVATE);
         String token = sharedPref.getString("token", "");
-
         ApiService api = RetrofitClient.getRetrofitInstance().create(ApiService.class);
         Call<Book> call;
-
         if (!TextUtils.isEmpty(token)) {
             // 已登录用户，获取包含收藏状态的详情
             call = api.getBookDetailsWithFavorite(bookId, "Bearer " + token);
         } else {
-            // 未登录用户，获取基本详情
-            call = api.getBookDetails(bookId);
+            call = api.getBookDetails(bookId); // 未登录用户
         }
-
         call.enqueue(new Callback<Book>() {
             @Override
             public void onResponse(Call<Book> call, Response<Book> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    book = response.body();
+                    book = response.body(); // 更新本地 Book 对象
                     setupViews();
-                    setupFavoriteButton();
-                    recordViewHistory();
-                } else {
-                    Toast.makeText(BookDetailActivity.this, "获取书籍信息失败", Toast.LENGTH_SHORT).show();
-                    finish();
+                    setupFavoriteButton(); // 更新收藏按钮状态
                 }
             }
 
             @Override
             public void onFailure(Call<Book> call, Throwable t) {
-                Toast.makeText(BookDetailActivity.this, "网络错误: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                finish();
+
             }
         });
     }
@@ -128,40 +121,39 @@ public class BookDetailActivity extends AppCompatActivity {
                 .into(imageView);
     }
 
+    // 确保在获取详情后更新收藏状态
     private void setupFavoriteButton() {
-        updateFavoriteIcon();
+        updateFavoriteIcon(); // 根据 book.isFavorite() 更新 UI
         ivFavorite.setOnClickListener(v -> {
             if (!isUserLoggedIn()) {
                 startActivity(new Intent(this, LoginActivity.class));
                 Toast.makeText(this, "需要登录后才能收藏", Toast.LENGTH_SHORT).show();
                 return;
             }
+            // 直接根据当前状态切换，无需依赖 UI 显示
             toggleFavorite();
         });
     }
 
     private void toggleFavorite() {
         String token = "Bearer " + sharedPref.getString("token", "");
-        String action = book.isFavorite() ? "remove" : "add";
-
+        String action = book.isFavorite() ? "remove" : "add"; // 直接取当前状态
         ApiService api = RetrofitClient.getRetrofitInstance().create(ApiService.class);
         api.toggleFavorite(book.getId(), action, token).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    book.setFavorite(!book.isFavorite());
+                    book.setFavorite(!book.isFavorite()); // 更新状态
                     updateFavoriteIcon();
                     Toast.makeText(BookDetailActivity.this,
                             book.isFavorite() ? "已收藏" : "已取消收藏",
                             Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(BookDetailActivity.this, "操作失败，错误码：" + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(BookDetailActivity.this, "操作失败: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+
             }
         });
     }
